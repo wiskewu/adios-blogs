@@ -1,0 +1,52 @@
+{
+    "siteinfo": {
+        "name": "Adiós Blog",
+        "maintainer": "wiskewu",
+        "description": "Adiós的个人博客网站",
+        "keywords": "Adiós's independent blog",
+        "homepage": "/",
+        "publicPath": "/adios-blogs/"
+    },
+    "settings": {
+        "pageSize": 10,
+        "homepage": {
+            "filter": []
+        },
+        "navList": [
+            {
+                "title": "Home",
+                "pathname": "/"
+            },
+            {
+                "title": "Categories",
+                "pathname": "/categories/"
+            },
+            {
+                "title": "Tags",
+                "pathname": "/tags/"
+            },
+            {
+                "title": "About",
+                "pathname": "/about/"
+            },
+            {
+                "title": "Extra",
+                "pathname": "/extra/demo"
+            }
+        ],
+        "extraPages": [
+            {
+                "source": "demo",
+                "layout": "extra",
+                "outputName": "demo"
+            }
+        ]
+    },
+    "theme": {
+        "name": "default",
+        "path": "./theme"
+    },
+    "devServer": {
+        "port": 3000
+    }
+}

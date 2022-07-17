@@ -1,0 +1,35 @@
+<html lang="zh"><head><title>Adiós Blog</title><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="Adiós的个人博客网站"/><meta name="author"/><meta name="kewords" content="Adiós's independent blog"/><link rel="stylesheet" href="/statics/css/purecss/purecss-min@2.1.0.css"/><link rel="stylesheet" href="/statics/css/purecss/purecss@2.1.0-base-min.css"/><link rel="stylesheet" href="/statics/css/purecss/purecss@2.1.0-grids-responsive-min.css"/><link rel="stylesheet" href="/statics/css/theme.css"/><link rel="stylesheet" href="/statics/css/layout.css"/><style>.app-body ul.app-tags {
+    margin-top: 2em;
+    margin-bottom: 2em;
+}
+
+.app-body .app-tags li.app-tags-item a {
+    text-decoration: none;
+    display: inline-block;
+    padding: 0.25em 0.5em;
+    line-height: 1.5;
+    border-radius: 0.2em;
+    border-color: var(--color-secondary);
+    border-width: 1px;
+    border-style: solid;
+    cursor: pointer;
+
+    margin-right: 1em;
+    margin-bottom: 1em;
+}
+
+.app-body .app-tags li.app-tags-item a:hover {
+    color: var(--link-color);
+}</style></head><body class="theme-light"><div id="app"><div id="app-container"><header class="pure-g app-header"><div class="pure-u-1"><h1 class="app-header-title"><a href="/">Adiós Blog</a></h1><ul class="pure-g app-header-nav-list"><li class="app-header-nav-list-item"><a href="/" title="Home" data-url="/">Home</a></li><li class="app-header-nav-list-item"><a href="/categories/" title="Categories" data-url="/categories/">Categories</a></li><li class="app-header-nav-list-item"><a href="/tags/" title="Tags" data-url="/tags/">Tags</a></li><li class="app-header-nav-list-item"><a href="/about/" title="About" data-url="/about/">About</a></li><li class="app-header-nav-list-item"><a href="/extra/demo" title="Extra" data-url="/extra/demo">Extra</a></li><li class="app-header-nav-list-btn"><span class="theme-btn" onclick="toggleTheme(this)"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#sun" x="0" y="0" width="24" height="24"></use></svg></span></li></ul></div></header><script>(function () {
+    var navLinkEls = document.querySelectorAll('.app-header-nav-list a');
+    var href = location.href;
+    var pathname = location.pathname;
+    if (navLinkEls && navLinkEls.length) {
+        navLinkEls.forEach((aEl) => {
+            var url = aEl.dataset.url;
+            if (url === href || url === pathname) {
+                aEl.classList.add('link-active');
+            }
+        });
+    }
+})();</script><main class="app-body"><h2>所有标签</h2><ul class="pure-g app-tags"><li class="app-tags-item"><a href="/tags/js/1.html" title="js">js - 11</a></li><li class="app-tags-item"><a href="/tags/react/1.html" title="react">react - 11</a></li><li class="app-tags-item"><a href="/tags/moment/1.html" title="moment">moment - 1</a></li></ul></main><footer class="pure-g app-footer"><div class="pure-u-1"><div class="pure-g"><div class="pure-u-1"><abbr class="share-license" title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.">CC BY-NC 4.0</abbr><span class="copyright">&copy; wiskewu. 2022</span></div><div class="pure-u-1 last-update">站点最后更新于: 2022/7/17</div></div></div></footer></div></div></body><script src="/statics/js/main.js"></script></html>

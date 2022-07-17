@@ -1,9 +1,5 @@
 ## About
-这是我的关于页面。
-这是我的关于页面。
-这是我的关于页面。
-这是我的关于页面。
-这是我的关于页面。
-这是我的关于页面。
-这是我的关于页面。
+
+See more details at [github](https://github.com/wiskewu/).
+
 ![minion](/assets/posts/minion.png)

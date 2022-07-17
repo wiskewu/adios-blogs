@@ -28,10 +28,6 @@
             {
                 "title": "About",
                 "pathname": "/about/"
-            },
-            {
-                "title": "Extra",
-                "pathname": "/extra/demo"
             }
         ],
         "extraPages": [

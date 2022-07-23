@@ -30,15 +30,20 @@
   resolved "https://registry.npmmirror.com/@types/node/-/node-18.0.3.tgz#463fc47f13ec0688a33aec75d078a0541a447199"
   integrity sha512-HzNRZtp4eepNitP+BD6k2L6DROIDG4Q0fm4x+dwfsr6LGmROENnok75VGw40628xf+iR24WeMFcHuuBDUAzzsQ==
 
+"@wiske/adios-theme-default@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.npmmirror.com/@wiske/adios-theme-default/-/adios-theme-default-0.0.3.tgz#8e3931b13de47c5c70fbdeb31ded2d2e21a942e8"
+  integrity sha512-hqdJv0MLDgMsMqmesGgD11qV0y84O+So0l0/1lKbOfVB922S+/Iu8S7wS9GfRbtszV0h5XjlaL8frXq+eH9GWw==
+
 acorn@^7.1.1:
   version "7.4.1"
   resolved "https://registry.npmmirror.com/acorn/-/acorn-7.4.1.tgz#feaed255973d2e77555b83dbc08851a6c63520fa"
   integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
 
-adios-blog-cli@^0.0.4:
-  version "0.0.4"
-  resolved "https://registry.npmmirror.com/adios-blog-cli/-/adios-blog-cli-0.0.4.tgz#6a23b52c8ebbef027871a34d730f00b9d3dbd33b"
-  integrity sha512-6/iOIdDhwPS2KwkI7YhVOKYKdZuqsmz4+VclBeNRCGt/iu8D0MsXwcxnkwQr4uOfnFLxJu+Jfw4aPAUHHi/IjA==
+adios-blog-cli@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.npmmirror.com/adios-blog-cli/-/adios-blog-cli-0.0.5.tgz#f9d9f04f41f21a602abb8bfb65d0459672d92e81"
+  integrity sha512-cn5V+0FeInfdSrQfHRtQo7qR9EPlp9BUMcE7Bfdl5nTOnoMMV75OK8kK6Ym70tNOp3+XToQFiiRwaI/8VGv8oA==
   dependencies:
     chalk "4.0.0"
     clear "^0.1.0"
@@ -413,9 +418,9 @@ date-fns@^2.16.1:
   integrity sha512-8d35hViGYx/QH0icHYCeLmsLmMUheMmTyV9Fcm6gvNwdw31yXXH+O85sOBJ+OLnLQMKZowvpKb6FgMIQjcpvQw==
 
 dayjs@^1.10.7:
-  version "1.11.3"
-  resolved "https://registry.npmmirror.com/dayjs/-/dayjs-1.11.3.tgz#4754eb694a624057b9ad2224b67b15d552589258"
-  integrity sha512-xxwlswWOlGhzgQ4TKzASQkUhqERI3egRNqgV4ScR8wlANA/A9tZ7miXa44vTTKEq5l7vWoL5G57bG3zA+Kow0A==
+  version "1.11.4"
+  resolved "https://registry.npmmirror.com/dayjs/-/dayjs-1.11.4.tgz#3b3c10ca378140d8917e06ebc13a4922af4f433e"
+  integrity sha512-Zj/lPM5hOvQ1Bf7uAvewDaUcsJoI6JmNqmHhHl3nyumwe0XHwt8sWdOVAPACJzCebL8gQCi+K49w7iKWnGwX9g==
 
 debug@^4.1.1:
   version "4.3.4"
@@ -707,9 +712,9 @@ he@1.2.0:
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
 
 highlight.js@^11.5.1:
-  version "11.5.1"
-  resolved "https://registry.npmmirror.com/highlight.js/-/highlight.js-11.5.1.tgz#027c24e4509e2f4dcd00b4a6dda542ce0a1f7aea"
-  integrity sha512-LKzHqnxr4CrD2YsNoIf/o5nJ09j4yi/GcH5BnYz9UnVpZdS4ucMgvP61TDty5xJcFGRjnH4DpujkS9bHT3hq0Q==
+  version "11.6.0"
+  resolved "https://registry.npmmirror.com/highlight.js/-/highlight.js-11.6.0.tgz#a50e9da05763f1bb0c1322c8f4f755242cff3f5a"
+  integrity sha512-ig1eqDzJaB0pqEvlPVIpSSyMaO92bH1N2rJpLMN/nX396wTpDA4Eq0uK+7I/2XG17pFaaKE0kjV/XPeGt7Evjw==
 
 http@^0.0.1-security:
   version "0.0.1-security"

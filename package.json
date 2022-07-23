@@ -32,10 +32,10 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "adios-blog-cli": "^0.0.4",
+    "@wiske/adios-theme-default": "^0.0.3",
+    "adios-blog-cli": "^0.0.5",
     "chokidar-cli": "^3.0.0",
-    "gh-pages": "^4.0.0",
-    "pug": "^3.0.2"
+    "gh-pages": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "^18.0.3",

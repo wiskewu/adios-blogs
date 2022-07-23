@@ -39,8 +39,7 @@
         ]
     },
     "theme": {
-        "name": "default",
-        "path": "./theme"
+        "pkg": "@wiske/adios-theme-default"
     },
     "devServer": {
         "port": 3000

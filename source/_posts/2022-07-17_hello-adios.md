@@ -2,7 +2,7 @@
 title: Hello Adiós Blog
 layout: post
 createDate: 2022-07-17 15:22
-updateDate: 2022-07-17 15:22
+updateDate:
 author: wiskewu
 categories: blog
 tags: moment

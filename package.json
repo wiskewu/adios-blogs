@@ -1,6 +1,6 @@
 {
   "name": "adios-blogs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "template of static blog website, using 'adios-blog-cli' as cli to compile and preview.",
   "main": "index.js",
   "scripts": {

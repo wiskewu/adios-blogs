@@ -1,7 +1,7 @@
 {
   "name": "adios-blogs",
   "version": "0.0.2",
-  "description": "template of static blog website, using 'adios-blog-cli' as cli to compile and preview.",
+  "description": "source project of adios-blog, build by `adios-blog-cli`",
   "main": "index.js",
   "scripts": {
     "build": "node ./scripts/build.js",

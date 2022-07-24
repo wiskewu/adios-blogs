@@ -30,10 +30,10 @@
   resolved "https://registry.npmmirror.com/@types/node/-/node-18.0.3.tgz#463fc47f13ec0688a33aec75d078a0541a447199"
   integrity sha512-HzNRZtp4eepNitP+BD6k2L6DROIDG4Q0fm4x+dwfsr6LGmROENnok75VGw40628xf+iR24WeMFcHuuBDUAzzsQ==
 
-"@wiske/adios-theme-default@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.npmmirror.com/@wiske/adios-theme-default/-/adios-theme-default-0.0.3.tgz#8e3931b13de47c5c70fbdeb31ded2d2e21a942e8"
-  integrity sha512-hqdJv0MLDgMsMqmesGgD11qV0y84O+So0l0/1lKbOfVB922S+/Iu8S7wS9GfRbtszV0h5XjlaL8frXq+eH9GWw==
+"@wiske/adios-theme-default@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.npmmirror.com/@wiske/adios-theme-default/-/adios-theme-default-0.0.4.tgz#d3e7065ad7a1ed63bfa3773dbf00ec88ffb9fc53"
+  integrity sha512-fGsSnFBf95KNMRf94PFYwYb6F8BRugK3U6T2YdaN2H7voT16F7nx0oWQLuHRqOdt4f2hn8CuFOPckTOAOfG5mw==
 
 acorn@^7.1.1:
   version "7.4.1"

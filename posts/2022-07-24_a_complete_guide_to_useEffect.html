@@ -1,0 +1,1258 @@
+<html lang="zh"><head><title>Adiós Blog - React深入-useEffect完全指南</title><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="Adiós的个人博客网站"/><meta name="author"/><meta name="kewords" content="Adiós's independent blog"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss-min@2.1.0.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-base-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-grids-responsive-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/theme.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/layout.css"/><link rel="apple-touch-icon" sizes="180x180" href="/adios-blogs/statics/icons/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/adios-blogs/statics/icons/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/adios-blogs/statics/icons/favicon-16x16.png"/><link rel="manifest" href="/adios-blogs/statics/icons/site.webmanifest"/><link id="hl-github" rel="stylesheet" href="/adios-blogs/statics/css/highlight.js/github.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/markdown.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/post.css"/></head><body class="theme-light"><div id="app"><div id="app-container"><header class="app-post-header pure-g"><div class="pure-u-1"><div class="pure-g app-post-header--box"><h1 class="pure-u-1 post-header-title">React深入-useEffect完全指南</h1><div class="pure-u-1 post-header-info"><p class="post-header-info--created"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>24/07/2022 13:51</span></p><span class="post-header-info--divider">·</span><p class="post-header-info--author"><svg class="icon icon" aria-hidden="true"><use xlink:href="#pencil-alt" x="0" y="0" width="16" height="16"></use></svg><span>wiskewu</span></p></div></div></div></header><div class="pure-g app-post-navigation"><span click="toggleTheme()"><a href="/adios-blogs/"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#home" x="0" y="0" width="24" height="24"></use></svg></a></span><span class="theme-btn" onclick="toggleTheme(this)"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#sun" x="0" y="0" width="24" height="24"></use></svg></span></div><hr/><main class="app-body"><section class="app-post-body"><article class="markdown app-post-body-content"><blockquote>
+<p>通篇大部分内容来自<a href="https://overreacted.io/a-complete-guide-to-useeffect/">a-complete-guide-to-useeffect</a>;<br>
+部分内容根据作者自身理解略有修改和补充。</p>
+</blockquote>
+<hr>
+<h3 id="1658654151287-001" tabindex="-1"><a class="header-anchor" href="#1658654151287-001">#</a>背景</h3>
+<p>我们在使用<code>useEffect</code>时总会感觉一知半解，甚至无法理解部分行为与预期的不一致。心中常常迸发以下几个问题：</p>
+<ul>
+<li>如何使用<code>useEffect</code>模拟<code>componentDidMount</code>生命周期？</li>
+<li>如何正确地在<code>useEffect</code>里请求数据？<code>[]</code>又是什么？</li>
+<li>我应该把函数作为effect依赖吗？</li>
+<li>为什么有时候会出现无限重复请求的问题？</li>
+<li>为什么在effect里拿到的是旧的state或props？</li>
+</ul>
+<p>当你开始阅读以下接下来的内容时，你可能需要明白：“当你不再透过熟悉的class组件生命周期方法去窥视<code>useEffect</code>这个<code>Hook</code>时，你才能得以融会贯通。”</p>
+<p>让我们带着心中的疑问进入正文吧。</p>
+<hr>
+<h3 id="1" tabindex="-1"><a class="header-anchor" href="#1">#</a>摘要</h3>
+<p>如果你不想阅读整篇内容，可以快速浏览这份摘要。要是部分内容不理解，你可以向下翻阅查找更多详细内容。</p>
+<ol>
+<li>Question: 如何用<code>useEffect</code>模拟<code>componentDidMount</code>生命周期？</li>
+</ol>
+<p>虽然可以使用<code>useEffect(fn, [])</code>，但它们并不完全相等。和<code>componentDidMount</code>不一样，<code>useEffect</code>会捕获props和state。所以即使在回调函数里，你拿到的还是初始的props和state。如果你想拿到“最新”的值，你可以使用ref，不过，通常有更简单的方式，并不一定要用到ref。记住，effects的心智模型与<code>componentDidMount</code>以及其他生命周期是不同的。试图找到它们之间的一致性表达反而会使你更加混淆。想要更有效，你需要“Think in effects”，它的心智模型更接近于实现状态同步，而不是响应生命周期事件。</p>
+<ol start="2">
+<li>Question: 如何正确地在<code>useEffect</code>里请求数据？<code>[]</code>又是什么？</li>
+</ol>
+<p><code>[]</code>表示effect没有使用任何React数据流里的值，因此该effect仅被调用一次是安全的。<code>[]</code>同样也是一类常见问题的来源，也即你以为没使用到数据流里的值但实际上却用到了。</p>
+<ol start="3">
+<li>Question: 我应该把函数当作effect的依赖吗？</li>
+</ol>
+<p>一般建议把不依赖props和state的函数提到你的函数组件之外，并且把那些仅被effect使用到的函数放到effect里面。如果这样做了之后，你的effect还是需要用到组件内的函数（包括通过props传递的函数），可以在定义这些函数的地方使用<code>useCallback</code>包裹一层。这样即使后续函数需要使用到某些依赖值，也可以很方便地将这些依赖性添加至<code>useEffect</code>中。</p>
+<ol start="4">
+<li>Question: 为什么有时候会出现无限请求的问题？</li>
+</ol>
+<p>这个通常发生于你在effect里做数据请求并且没有设置effect依赖参数的情况。没有设置依赖的话，effect会在每次渲染之后执行一次，然后在effect中更新了状态引起组件渲染并再次触发effect。无限循环的发生也可能是因为你设置的依赖总是会在组件更新时改变。你可以通过一个个移除的方式排查出哪个依赖导致了问题，但是，移除你使用的依赖（或者盲目地使用<code>[]</code>）通常是一种错误的解决方式。你应该做的是解决问题的根源。举个例子，函数可能会导致这个问题，你可以把它们放到effect里，或者提到组件外面，或者用<code>useCallback</code>包一层，<code>useMemo</code>可以做类似的事情以避免重复生成对象。</p>
+<ol start="5">
+<li>为什么有时候在effect里拿到的是旧的state或props呢？</li>
+</ol>
+<p><em>effect拿到的总是定义它的那一次渲染中的props或state</em>。如果你觉得在渲染中拿到了一些旧的props或state，且不是你想要的，那么你很可能遗漏了一些依赖。</p>
+<hr>
+<h3 id="propsstate" tabindex="-1"><a class="header-anchor" href="#propsstate">#</a>每一次渲染都有它自己的Props和State</h3>
+<p>在我们讨论effects之前，我们需要先讨论一下渲染(rendering)。<br>
+我们来看一个Counter组件：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> [count, setCount] = <span class="hljs-title function_">useState</span>(<span class="hljs-number">0</span>);
+
+    <span class="hljs-keyword">return</span> (
+        <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>you clicked {count} times<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> setCount(count + 1)}&gt;Click me<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+</code></pre>
+<p>注意观察“</p><p>you clicked {count} times</p>”这行代码。<code>count</code>会”监听“状态的变化并自动更新吗？实际上<code>count</code>仅是一个数字而已。它不是神奇的”data binding“、”watcher“、”proxy“，或者其他任何东西，它就是一个普通的数字而已，就像下面这样：
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">const</span> count = <span class="hljs-number">0</span>;
+<span class="hljs-comment">// ...</span>
+<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>you clicked {count} times<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<p>我们的组件第一次渲染时，从<code>useEffect</code>拿到<code>count</code>的初始值是<code>0</code>。当我们调用<code>setCount(1)</code>时，React会再次渲染组件，这一次<code>count</code>是<code>1</code>，如此等等：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-comment">// 首次渲染</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> count = <span class="hljs-number">0</span>; <span class="hljs-comment">// Returned by useState</span>
+    <span class="hljs-keyword">return</span> (
+        <span class="hljs-comment">// ...</span>
+        <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>you clicked {count} times<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+        <span class="hljs-comment">// ...</span>
+    )
+}
+
+<span class="hljs-comment">// 点击一次按钮之后，组件更新并渲染</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> count = <span class="hljs-number">1</span>; <span class="hljs-comment">// Returned by useState</span>
+    <span class="hljs-keyword">return</span> (
+        <span class="hljs-comment">// ...</span>
+        <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>you clicked {count} times<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+        <span class="hljs-comment">// ...</span>
+    )
+}
+
+<span class="hljs-comment">// 再次点击按钮之后，组件更新并渲染</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> count = <span class="hljs-number">2</span>; <span class="hljs-comment">// Returned by useState</span>
+    <span class="hljs-keyword">return</span> (
+        <span class="hljs-comment">// ...</span>
+        <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>you clicked {count} times<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+        <span class="hljs-comment">// ...</span>
+    )
+}
+</code></pre>
+<p>当我们更新状态的时候，React会重新渲染组件。每一次渲染都能拿到独立的<code>count</code>状态，这个状态是函数中的一个常量。<br>
+所以下面这行代码没有做任何特殊的数据绑定：</p>
+<pre class="language-jsx" data-lang="Javascript"><code>&lt;p&gt;you clicked {count} times&lt;/p&gt;
+</code></pre>
+<p>它仅仅只是在渲染输出中插入了<code>count</code>这个数字，这个数字由React提供。当<code>setCount</code>的时候，React会带着一个不同的<code>count</code>值再次调用组件。然后，React会更新DOM以保持和渲染输出一致。</p>
+<p>这里关键的点在于任意一次渲染中的<code>count</code>常量都不会随着时间改变。渲染输出会变是因为我们的组件被一次次调用，而每一次调用引起的渲染中，它包含的<code>count</code>值独立于其他渲染。</p>
+<h3 id="2" tabindex="-1"><a class="header-anchor" href="#2">#</a>每一次渲染都有它自己的事件处理函数</h3>
+<p>看下面这个例子：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> [count, setCount] = <span class="hljs-title function_">useState</span>(<span class="hljs-number">0</span>);
+
+    <span class="hljs-keyword">function</span> <span class="hljs-title function_">handleAlertClick</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-comment">// 三秒之后弹出点击次数</span>
+        <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+            <span class="hljs-title function_">alert</span>(<span class="hljs-string">&#x27;你点击了&#x27;</span> + count);
+        }, <span class="hljs-number">3000</span>);
+    }
+
+    <span class="hljs-keyword">return</span> (
+        <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>you clicked {count} times<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> setCount(count + 1)}&gt;Plus one<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{handleAlertClick}</span>&gt;</span>Alert<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    );
+}
+</code></pre>
+<p>如果我按照下面的步骤去操作：</p>
+<ol>
+<li>连续点击”Plus one“按钮增加计数器到3</li>
+<li>点击一下”Alert“按钮</li>
+<li>在定时器回调触发前继续点击”Plus one“到5</li>
+</ol>
+<h2 id="&quot;3&quot;&quot;5&quot;-&quot;3&quot;&quot;&quot;" tabindex="-1"><a class="header-anchor" href="#"3""5"-"3"""">#</a>此时会弹出”3“还是”5“？ 正确答案是”3“，即事件”捕获“了我点击按钮时候的状态。</h2>
+<p>但它究竟是如何工作的呢？我们发现<code>count</code>在每一次函数调用中都是一个常量值。值得强调的是，我们的组件函数每次渲染都会被调用，但是每一次调用中<code>count</code>值都是常量，并且它被赋予了当前渲染中的状态值。<br>
+这并不是React特有，普通的函数也有类似的行为：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">sayHi</span>(<span class="hljs-params">person</span>) {
+    <span class="hljs-comment">// 注意此处读值</span>
+    <span class="hljs-keyword">const</span> name = person.<span class="hljs-property">name</span>;
+    <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-title function_">alert</span>(<span class="hljs-string">&#x27;Hello, &#x27;</span> + name);
+    }, <span class="hljs-number">3000</span>);
+}
+
+<span class="hljs-keyword">let</span> someone = { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Dan&quot;</span> };
+<span class="hljs-title function_">sayHi</span>(someone);
+
+someone = { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Yuzhi&quot;</span> };
+<span class="hljs-title function_">sayHi</span>(someone);
+
+someone = { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Dominic&quot;</span> };
+<span class="hljs-title function_">sayHi</span>(someone);
+</code></pre>
+<p>在上面这个例子中。外层的<code>someone</code>会被赋值很多次（就像React中组件的状态会改变一样）。然后，在<code>sayHi</code>函数中，局部常量<code>name</code>回和某次调用中的<code>person</code>关联。因为这个变量是局部的，所以每一次调用都是相互独立的。结果就是，当定时器触发时，每一个alert都会弹出它所拥有的<code>name</code>。</p>
+<p>这就解释了我们的事件处理函数如何捕获点击时的<code>count</code>值。如果我们应用相同的替换原理，每一次渲染”看到“的都是它自己的<code>count</code>:</p>
+<pre class="language-tsx" data-lang="TypeScript"><code><span class="hljs-comment">// 首次渲染</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> count = <span class="hljs-number">0</span>; <span class="hljs-comment">// Returned by useState</span>
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">function</span> <span class="hljs-title function_">handleAlertClick</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+            <span class="hljs-title function_">alert</span>(<span class="hljs-string">&#x27;你点击了&#x27;</span> + count)
+        }, <span class="hljs-number">3000</span>);
+    }
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-comment">// 第一次点击Plus one按钮</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> count = <span class="hljs-number">1</span>; <span class="hljs-comment">// Returned by useState</span>
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">function</span> <span class="hljs-title function_">handleAlertClick</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+            <span class="hljs-title function_">alert</span>(<span class="hljs-string">&#x27;你点击了&#x27;</span> + count)
+        }, <span class="hljs-number">3000</span>);
+    }
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-comment">// 第二次点击Plus one按钮</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> count = <span class="hljs-number">2</span>; <span class="hljs-comment">// Returned by useState</span>
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">function</span> <span class="hljs-title function_">handleAlertClick</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+            <span class="hljs-title function_">alert</span>(<span class="hljs-string">&#x27;你点击了&#x27;</span> + count)
+        }, <span class="hljs-number">3000</span>);
+    }
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>所以实际上，每一次渲染都有一个”新版本“的<code>handleAlertClick</code>。每一个版本的<code>handleAlertClick</code>函数”记住“了它自己的<code>count</code>：</p>
+<pre class="language-tsx" data-lang="TypeScript"><code><span class="hljs-comment">// 首次渲染</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">function</span> <span class="hljs-title function_">handleAlertClick</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+            <span class="hljs-title function_">alert</span>(<span class="hljs-string">&#x27;你点击了&#x27;</span> + <span class="hljs-number">0</span>)
+        }, <span class="hljs-number">3000</span>);
+    }
+    <span class="hljs-comment">// ... 函数内持有了 0 值</span>
+    &lt;button onClick={handleAlertClick}&gt;<span class="hljs-title class_">Alert</span>&lt;/button&gt;
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-comment">// 第一次点击Plus one按钮</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">function</span> <span class="hljs-title function_">handleAlertClick</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+            <span class="hljs-title function_">alert</span>(<span class="hljs-string">&#x27;你点击了&#x27;</span> + <span class="hljs-number">1</span>)
+        }, <span class="hljs-number">3000</span>);
+    }
+    <span class="hljs-comment">// ... 函数内持有了 1 值</span>
+    &lt;button onClick={handleAlertClick}&gt;<span class="hljs-title class_">Alert</span>&lt;/button&gt;
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-comment">// 第二次点击Plus one按钮</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">function</span> <span class="hljs-title function_">handleAlertClick</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+            <span class="hljs-title function_">alert</span>(<span class="hljs-string">&#x27;你点击了&#x27;</span> + <span class="hljs-number">2</span>)
+        }, <span class="hljs-number">3000</span>);
+    }
+    <span class="hljs-comment">// ... 函数内持有了 2 值</span>
+    &lt;button onClick={handleAlertClick}&gt;<span class="hljs-title class_">Alert</span>&lt;/button&gt;
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>也就是说事件处理函数”属于“某一次特定的渲染，当你点击的时候，它会使用那次渲染中<code>counter</code>的状态值。</p>
+<p>在任意一次渲染中，props和state是始终不变的。如果props和state在不同的渲染中是相互独立的，那么使用到它们的任何值也是独立的（包括事件处理函数）。它们都”属于“一次特定的渲染。即便是事件处理中的异步函数调用”看到“的也是这次渲染中的<code>count</code>值。</p>
+<h3 id="effects" tabindex="-1"><a class="header-anchor" href="#effects">#</a>每次渲染都有它自己的Effects</h3>
+<p>通过上述的计数器例子，我们已经知道<code>count</code>是属于某个特定渲染中的常量。事件处理函数”看到“的是属于它那次特定渲染中的<code>count</code>值，对于effects也同样如此。</p>
+<p>并不是<code>count</code>的值在”不变“的effect中发生了改变，而是effect本身在每一次渲染中都不相同。<br>
+每一个effect版本”看到“的<code>count</code>值都来自于它属于的那一次渲染：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-comment">// 首次渲染</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">const</span> count = <span class="hljs-number">0</span>; <span class="hljs-comment">// Returned by useState</span>
+    <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-variable language_">document</span>.<span class="hljs-property">title</span> = <span class="hljs-string">`You clicked <span class="hljs-subst">${<span class="hljs-number">0</span>}</span> times`</span>;
+    });
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-comment">// 第一次点击Plus one按钮</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">const</span> count = <span class="hljs-number">1</span>; <span class="hljs-comment">// Returned by useState</span>
+    <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-variable language_">document</span>.<span class="hljs-property">title</span> = <span class="hljs-string">`You clicked <span class="hljs-subst">${<span class="hljs-number">1</span>}</span> times`</span>;
+    });
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-comment">// 第二次点击Plus one按钮</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">const</span> count = <span class="hljs-number">2</span>; <span class="hljs-comment">// Returned by useState</span>
+    <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-variable language_">document</span>.<span class="hljs-property">title</span> = <span class="hljs-string">`You clicked <span class="hljs-subst">${<span class="hljs-number">2</span>}</span> times`</span>;
+    });
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>React会记住你提供的effect函数，并且会在每次更改作用于DOM并让浏览器绘制屏幕后去调用它。</p>
+<p>所以索然我们说的是一个effect（这里指的是上述更新document的title），但其实每次渲染都是一个不同的函数-- 并且每个effect函数“看到”的props和state都来自于它属于的那次特定渲染。</p>
+<p>概念上，你可以想象effects是渲染结果的一部分。</p>
+<p>严格来说，它们并不是（为了允许Hooks组合并且不引入笨拙的语法或者运行时）。但是在我们构建的心智模型上，effect函数属于某个特定的渲染，就像事件处理函数一样。</p>
+<hr>
+<p>为了确保我们已经有了扎实的理解，我们再回顾一下第一次的渲染过程：</p>
+<ol>
+<li>React：给我状态为<code>0</code>时候的UI。</li>
+<li>你的组件：
+<ul>
+<li>给你需要渲染的内容：<code>&lt;p&gt;You clicked 0 times&lt;/p&gt;</code>；</li>
+<li>记得在渲染完了之后调用这个effect：<code>() =&gt; document.title = 'you clicked 0 times'</code>；</li>
+</ul>
+</li>
+<li>React: 没问题，开始更新UI，喂浏览器，我要给DOM添加一些东西。</li>
+<li>浏览器：酷，我已经把它绘制到屏幕上了。</li>
+<li>React：好的，我现在开始运行给我的effect
+<ul>
+<li>运行<code>() =&gt; document.title = 'you clicked 0 times'</code>。</li>
+</ul>
+</li>
+</ol>
+<p>现在让我们回顾一下我们点击之后发生了什么：</p>
+<ol>
+<li>你的组件：喂React，把我的状态设置为<code>1</code>。</li>
+<li>React：好的，给我状态为<code>1</code>时候的UI。</li>
+<li>你的组件：
+<ul>
+<li>给你需要渲染的内容：<code>&lt;p&gt;You clicked 1 times&lt;/p&gt;</code>；</li>
+<li>记得在渲染完了之后调用这个effect：<code>() =&gt; document.title = 'you clicked 1 times'</code>；</li>
+</ul>
+</li>
+<li>React: 没问题，开始更新UI，喂浏览器，我要给DOM添加一些东西。</li>
+<li>浏览器：酷，我已经把它绘制到屏幕上了。</li>
+<li>React：好的，我现在开始运行给我的effect
+<ul>
+<li>运行<code>() =&gt; document.title = 'you clicked 1 times'</code>。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="..." tabindex="-1"><a class="header-anchor" href="#...">#</a>每一次渲染都有它自己的…所有</h3>
+<p>我们现在知道effects会在每次渲染之后运行，并且概念上它是组件输出的一部分，可以”看到“属于某次特定渲染的props和state。</p>
+<p>思考以下代码：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> [count, setCount] = <span class="hljs-title function_">useState</span>(<span class="hljs-number">0</span>);
+
+    <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+            <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`You clicked <span class="hljs-subst">${count}</span> times`</span>);
+        }, <span class="hljs-number">3000</span>);
+    });
+
+    <span class="hljs-keyword">return</span> (
+        <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>You clicked {count} times<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> setCount(count + 1)}&gt;
+                Click me
+            <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    );
+}
+</code></pre>
+<p>如果我点击了很多次并且在effect里设置了延时，打印出来的结果是什么呢？<br>
+正确的答案是我们将会看到顺序的打印：</p>
+<pre data-lang="Code"><code>// init
+You clicked 0 times
+// click
+You clicked 1 times
+You clicked 2 times
+You clicked 3 times
+You clicked 4 times
+...
+</code></pre>
+<p>不过，class组件中的<code>this.state</code>并不是这样运作的。你可能会想当然以为下面的class实现和上面是相等的：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">class</span> <span class="hljs-title class_">Example</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Component</span> {
+  state = {
+    <span class="hljs-attr">count</span>: <span class="hljs-number">0</span>
+  };
+  <span class="hljs-title function_">componentDidMount</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`You clicked <span class="hljs-subst">${<span class="hljs-variable language_">this</span>.state.count}</span> times`</span>);
+    }, <span class="hljs-number">3000</span>);
+  }
+  <span class="hljs-title function_">componentDidUpdate</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`You clicked <span class="hljs-subst">${<span class="hljs-variable language_">this</span>.state.count}</span> times`</span>);
+    }, <span class="hljs-number">3000</span>);
+  }
+  <span class="hljs-title function_">render</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> (
+      <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>You clicked {this.state.count} times<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> this.setState({
+          count: this.state.count + 1
+        })}&gt;
+          Click me
+        <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+  }
+}
+</code></pre>
+<p>然而，<code>this.state.count</code>总是指向最新的<code>count</code>值，而不是属于某次特定渲染的值。<br>
+所以你会看到每次打印输出都是同一个值（假设连续点击了五次按钮）：</p>
+<pre data-lang="Code"><code>// init
+You clicked 0 times
+// click
+You clicked 5 times
+You clicked 5 times
+You clicked 5 times
+You clicked 5 times
+You clicked 5 times
+...
+</code></pre>
+<p>Hooks这么依赖JavaScript闭包是挺讽刺的一件事。有时候组件的class实现方式会受闭包相关的苦，但其实这个例子中真正混乱的来源是可变数据（React修改了class中的<code>this.state</code>使其指向最新状态），并不是闭包本身的错。</p>
+<p>当封闭的值始终不会变的情况下闭包是非常棒的。这使得它们非常容易思考，因为你本质上是在引用常量。正如我们所讨论的，props和state在某个特定渲染中是不会改变的。顺便说一下，我们可以使用闭包去修复上面的class版本：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">class</span> <span class="hljs-title class_">Example</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Component</span> {
+  state = {
+    <span class="hljs-attr">count</span>: <span class="hljs-number">0</span>
+  };
+  <span class="hljs-title function_">componentDidMount</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> count = <span class="hljs-variable language_">this</span>.<span class="hljs-property">state</span>.<span class="hljs-property">count</span>;
+    <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`You clicked <span class="hljs-subst">${count}</span> times`</span>);
+    }, <span class="hljs-number">3000</span>);
+  }
+  <span class="hljs-title function_">componentDidUpdate</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> count = <span class="hljs-variable language_">this</span>.<span class="hljs-property">state</span>.<span class="hljs-property">count</span>;
+    <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`You clicked <span class="hljs-subst">${count}</span> times`</span>);
+    }, <span class="hljs-number">3000</span>);
+  }
+  <span class="hljs-title function_">render</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> (
+      <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>You clicked {this.state.count} times<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> this.setState({
+          count: this.state.count + 1
+        })}&gt;
+          Click me
+        <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+  }
+}
+</code></pre>
+<h3 id="3" tabindex="-1"><a class="header-anchor" href="#3">#</a>逆潮而动</h3>
+<p>到目前为止，我们可以明确地喊出下面重要的事实：<strong>每一个组件内的函数（包括事件处理函数，effects，定时器或者API调用等等）会捕获某次渲染中定义的props和state</strong>。</p>
+<p>所以下面的两个例子是相等的：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Example</span>(<span class="hljs-params">props</span>) {
+    <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+            <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(props.<span class="hljs-property">counter</span>);
+        }, <span class="hljs-number">1000</span>);
+    });
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>例二：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Example</span>(<span class="hljs-params">props</span>) {
+    <span class="hljs-keyword">const</span> counter = props.<span class="hljs-property">counter</span>;
+    <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+            <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(counter);
+        }, <span class="hljs-number">1000</span>);
+    });
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>在组件内什么时候去读取props或state是无关紧要的，因为它们不会改变。在单次渲染的范围内，props和state始终保持不变（解构赋值的props会使得这一点更明显）。</p>
+<blockquote>
+<p>当然，有时候你可能想在effect的回调函数里读取最新的值而不是捕获的值。最简单的实现方法是使用refs。</p>
+</blockquote>
+<p>需要注意的是，当你想要从过去渲染的函数里读取未来的props和state，你是在逆潮而动。虽然它并没有错（有时候可能也需要这么做），但它打破了默认范式会使代码显得不够“干净”。这是我们有意为之的，因为它能帮助突出哪些代码是脆弱的，是需要依赖时间次序的。在class中，发生这种情况就没那么显而易见的。</p>
+<p>下面的计数器版本模拟了class中的行为：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Example</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> [count, setCount] = <span class="hljs-title function_">useState</span>(<span class="hljs-number">0</span>);
+    <span class="hljs-keyword">const</span> latestCount = <span class="hljs-title function_">useRef</span>(count);
+
+    <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-comment">// 更新到最新值</span>
+        latestCount.<span class="hljs-property">current</span> = count;
+        <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+            <span class="hljs-comment">// 读取最新的可变值</span>
+            <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`You clicked <span class="hljs-subst">${latestCount.current}</span> times`</span>);
+        }, <span class="hljs-number">3000</span>);
+    });
+
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>连续点击五次按钮之后：</p>
+<pre data-lang="Code"><code>// init
+You clicked 0 times
+// click
+You clicked 5 times
+You clicked 5 times
+You clicked 5 times
+You clicked 5 times
+You clicked 5 times
+...
+</code></pre>
+<h3 id="effect" tabindex="-1"><a class="header-anchor" href="#effect">#</a>Effect中的清理</h3>
+<p>像<a href="https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup">React官网</a>介绍的，有些effects可能需要一个清理步骤。本质上，它的目的是消除副作用（effect），比如取消订阅。</p>
+<p>思考以下代码：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-comment">// ...</span>
+<span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title class_">ChatAPI</span>.<span class="hljs-title function_">subscribeToFriendStatus</span>(props.<span class="hljs-property">id</span>, handleStatusChange);
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-title class_">ChatAPI</span>.<span class="hljs-title function_">unsubscribeFromFriendStatus</span>(props.<span class="hljs-property">id</span>, handleStatusChange);
+    };
+});
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<p>假设第一次渲染时<code>props</code>是<code>{ id: 10 }</code>，第二次渲染时是<code>{ id: 20 }</code>。你可能会认为发生了下面这些事情：</p>
+<ol>
+<li>React清除了<code>{ id: 10 }</code>的effect；</li>
+<li>React渲染了<code>{ id: 20 }</code>的UI；</li>
+<li>React运行了<code>{ id: 20 }</code>的effect;</li>
+</ol>
+<p>但事实上并不是这样的。</p>
+<p>React只会在浏览器绘制后运行effects，这使得你的应用更流畅，因为大多数effects并不会阻塞屏幕的更新。Effects的清除同样被延迟了，上一次的effect会在重新渲染后被清除：</p>
+<ol>
+<li>React渲染<code>{ id: 20 }</code>的UI；</li>
+<li>浏览器绘制，我们在屏幕上看到<code>{ id: 10 }</code>的UI；</li>
+<li>React清除<code>{ id: 10 }</code>的effect；</li>
+<li>React运行<code>{ id: 20 }</code>的effect。</li>
+</ol>
+<p>你可能会好奇：如果清除上一次effect发生在props变成<code>{ id: 20 }</code>之后，那它为什么还能“看到”旧的<code>{ id: 10 }</code>？</p>
+<p>我们可以引用上半部分得到的结论：</p>
+<blockquote>
+<p>组件内的每一个函数（包括事件处理函数，effects，定时器或者API调用等等）会捕获定义它们的那次渲染中的props和state。</p>
+</blockquote>
+<p>现在答案显而易见，effect的清除并不会读取“最新”的props。它只能读取到定义它的那次渲染中的props：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-comment">// 首次渲染, props为{ id: 10 }</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Example</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-title class_">ChatAPI</span>.<span class="hljs-title function_">subscribeToFriendStatus</span>(<span class="hljs-number">10</span>, handleStatusChange);
+        <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> {
+            <span class="hljs-title class_">ChatAPI</span>.<span class="hljs-title function_">unsubscribeFromFriendStatus</span>(<span class="hljs-number">10</span>, handleStatusChange);
+        };
+    });
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-comment">// props更新为{ id: 20 }</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Example</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-title class_">ChatAPI</span>.<span class="hljs-title function_">subscribeToFriendStatus</span>(<span class="hljs-number">20</span>, handleStatusChange);
+        <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> {
+            <span class="hljs-title class_">ChatAPI</span>.<span class="hljs-title function_">unsubscribeFromFriendStatus</span>(<span class="hljs-number">20</span>, handleStatusChange);
+        };
+    });
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>这正是为什么React能做到在绘制之后立即处理effects–并且默认情况下使你的应用运行更流畅。因为你的代码依然可以访问到旧的props，因此清除effect的过程可以发生在UI渲染之后。</p>
+<h3 id="4" tabindex="-1"><a class="header-anchor" href="#4">#</a>同步，而非生命周期</h3>
+<p>假设有这么个组件：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Greeting</span>(<span class="hljs-params">{ name }</span>) {
+    <span class="hljs-keyword">return</span> (
+        <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;greeting&quot;</span>&gt;</span>Hello, {name}<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>
+    );
+}
+</code></pre>
+<p>我先渲染<code>&lt;Greeting name=&quot;Dan&quot; /&gt;</code>然后渲染<code>&lt;Greeting name=&quot;Yuzhi&quot; /&gt;</code>和我直接渲染<code>&lt;Greeting name=&quot;Yuzhi&quot; /&gt;</code>并没有什么区别。在这两种情况下，我们最后看到的都是<code>Hello, Yuzhi</code>。</p>
+<p>人们总是说：“重要的是旅行过程，而不是目的地”。在React世界里，恰好相反。重要的是目的，而不是过程。<br>
+React会根据我们当前的props和state同步到DOM。“mount”和“update”之于渲染并没有什么区别。</p>
+<p>你应该以相同的方式去思考effects。<code>useEffect</code>使你能够根据props和state同步React Tree之外的东西。</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Greeting</span>(<span class="hljs-params">{ name }</span>) {
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-variable language_">document</span>.<span class="hljs-property">title</span> = <span class="hljs-string">&#x27;Hello, &#x27;</span> + name;
+  });
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;Greeting&quot;</span>&gt;</span>
+      Hello, {name}
+    <span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>
+  );
+}
+</code></pre>
+<p>这就是和大家熟知的mount/update/unmount心智模型之间细微的区别。理解和内化这种区别是非常重要的。如果你试图写一个effect会根据是否第一次渲染而表现不一致，那么你正在逆潮而动。如果我们的结果依赖于过程而不是目的，我们就会在同步中犯错。</p>
+<p>先渲染属性A、B，再渲染C，和立即渲染C并没有什么区别。虽然它们可能短暂地会有点不同（比如请求数据时），但最终的结果是一样的。</p>
+<p>不过话说回来，在每一次渲染后都去运行所有的effects可能并不高效。（并且在某些场景下，它可能会导致无限循环）</p>
+<h3 id="reacteffects" tabindex="-1"><a class="header-anchor" href="#reacteffects">#</a>告诉React去对比你的effects</h3>
+<p>其实我们已经从React处理DOM的方式中学习到了解决办法。React只会更新DOM真正发生改变的部分，而不是每次渲染都大动干戈。<br>
+当你把：</p>
+<pre class="language-jsx" data-lang="Javascript"><code>&lt;h1 className=<span class="hljs-string">&quot;Greeting&quot;</span>&gt;
+  <span class="hljs-title class_">Hello</span>, <span class="hljs-title class_">Dan</span>
+&lt;/h1&gt;
+</code></pre>
+<p>更新到：</p>
+<pre class="language-jsx" data-lang="Javascript"><code>&lt;h1 className=<span class="hljs-string">&quot;Greeting&quot;</span>&gt;
+  <span class="hljs-title class_">Hello</span>, <span class="hljs-title class_">Yuzhi</span>
+&lt;/h1&gt;
+</code></pre>
+<p>React能够看到两个对象：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">const</span> oldProps = {<span class="hljs-attr">className</span>: <span class="hljs-string">&#x27;greeting&#x27;</span>, <span class="hljs-attr">children</span>: <span class="hljs-string">&#x27;Hello, Dan&#x27;</span>};
+<span class="hljs-keyword">const</span> newProps = {<span class="hljs-attr">className</span>: <span class="hljs-string">&#x27;greeting&#x27;</span>, <span class="hljs-attr">children</span>: <span class="hljs-string">&#x27;Hello, Yuzhi&#x27;</span>};
+</code></pre>
+<p>它会检测每一个props，并且发现<code>children</code>发生变化需要更新DOM，但<code>className</code>并没有变化，所以它只需要这么做：</p>
+<pre class="language-js" data-lang="Javascript"><code>domNode.<span class="hljs-property">innerText</span> = <span class="hljs-string">&#x27;Hello, Yuzhi&#x27;</span>;
+<span class="hljs-comment">// No need to touch domNode.className</span>
+</code></pre>
+<p>我们也可以用类似的方式处理effects吗？如果能够在不需要的时候避免调用effect就太好了。举个例子，我们的组件可能因为状态变更而重新渲染：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Greeting</span>(<span class="hljs-params">{ name }</span>) {
+  <span class="hljs-keyword">const</span> [counter, setCounter] = <span class="hljs-title function_">useState</span>(<span class="hljs-number">0</span>);
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-variable language_">document</span>.<span class="hljs-property">title</span> = <span class="hljs-string">&#x27;Hello, &#x27;</span> + name;
+  });
+
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;Greeting&quot;</span>&gt;</span>
+      Hello, {name}
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> setCounter(counter + 1)}&gt;
+        Increment
+      <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>
+  );
+}
+</code></pre>
+<p>但是我们的effect并没有使用<code>counter</code>这个状态。我们的effect只会同步<code>name</code>属性给<code>document.title</code>，但<code>name</code>并没有变。在每一次<code>counter</code>改变后重新给<code>document.title</code>赋值并不是理想的做法。</p>
+<p>那React可以…区分effects的不同吗？比如：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">let</span> <span class="hljs-title function_">oldEffect</span> = (<span class="hljs-params"></span>) =&gt; { <span class="hljs-variable language_">document</span>.<span class="hljs-property">title</span> = <span class="hljs-string">&#x27;Hello, Dan&#x27;</span>; };
+<span class="hljs-keyword">let</span> <span class="hljs-title function_">newEffect</span> = (<span class="hljs-params"></span>) =&gt; { <span class="hljs-variable language_">document</span>.<span class="hljs-property">title</span> = <span class="hljs-string">&#x27;Hello, Dan&#x27;</span>; };
+<span class="hljs-comment">// React可以看到这两个函数做了相同的事情吗？</span>
+</code></pre>
+<p>很明显，如果不执行的话React并不能猜测到函数做了什么。（源码中并没有包含特殊的值，它仅仅只是引用了<code>name</code>属性）</p>
+<p>这就是为什么你如果想要避免effects不必要的重复调用，你可以提供给<code>useEffect</code>一个依赖数组参数(deps):</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-comment">// ...</span>
+<span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-variable language_">document</span>.<span class="hljs-property">title</span> = <span class="hljs-string">&#x27;Hello, &#x27;</span> + name;
+  }, [name]); <span class="hljs-comment">// 显式声明依赖项</span>
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<p>这好比你告诉React：“Hey，我知道你看不到这个函数里的东西，但我可以保证只使用了渲染中的<code>name</code>，别无其他。”</p>
+<p>如果当前渲染中的这些依赖项和上一次运行这个effect的时候值一样，因为没有什么需要同步，那么React会自动跳过这次effect：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">const</span> <span class="hljs-title function_">oldEffect</span> = (<span class="hljs-params"></span>) =&gt; { <span class="hljs-variable language_">document</span>.<span class="hljs-property">title</span> = <span class="hljs-string">&#x27;Hello, Dan&#x27;</span>; };
+<span class="hljs-keyword">const</span> oldDeps = [<span class="hljs-string">&#x27;Dan&#x27;</span>];
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">newEffect</span> = (<span class="hljs-params"></span>) =&gt; { <span class="hljs-variable language_">document</span>.<span class="hljs-property">title</span> = <span class="hljs-string">&#x27;Hello, Dan&#x27;</span>; };
+<span class="hljs-keyword">const</span> newDeps = [<span class="hljs-string">&#x27;Dan&#x27;</span>];
+
+<span class="hljs-comment">// React无法感知函数内部是否变化，但它可以比对依赖项</span>
+<span class="hljs-comment">// 因为依赖性没有改变，所以React无需再次执行这个effect</span>
+</code></pre>
+<p>即使依赖数组中只有一个值在两次渲染中不一样，我们也不能跳过effect的运行。要同步所有！</p>
+<h3 id="react" tabindex="-1"><a class="header-anchor" href="#react">#</a>别对React欺骗所需的依赖项</h3>
+<p>在依赖项上，对React欺骗会导致不好的结果。这很好理解，但是在编写代码时却又常常违反这个范式：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">SearchResults</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">fetchData</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+  }
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">fetchData</span>();
+  }, []); <span class="hljs-comment">// 这样做可行吗？并不完全，有更好的方法去实现这个effect</span>
+
+  <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>上述代码中你可能只是想在组件挂载时运行某个effect。但是你必须记住：“一旦你设置了依赖项，那么effect中用到的所有组件内的值都要包含在依赖中。这包括props、state、函数—组件内的任何东西”。</p>
+<p>有时候你按照上述说的做了，但可能会引起一个问题。比如，你可能会遇到无限请求的问题，或者socket被频繁创建的问题。解决问题的方法不是移除依赖项，我们在接下来的内容会了解到具体的解决方案。</p>
+<h3 id="5" tabindex="-1"><a class="header-anchor" href="#5">#</a>如果设置了错误的依赖会怎么样？</h3>
+<p>如果依赖项包含了所有effect中使用到的值，React就能知道何时需要运行它：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-variable language_">document</span>.<span class="hljs-property">title</span> = <span class="hljs-string">&#x27;Hello, &#x27;</span> + name;
+}, [name]);
+</code></pre>
+<p>但是如果我们将<code>[]</code>设为effect的依赖，新的effect函数不会运行：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-variable language_">document</span>.<span class="hljs-property">title</span> = <span class="hljs-string">&#x27;Hello, &#x27;</span> + name;
+}, []); <span class="hljs-comment">// 错误：缺失了name依赖</span>
+</code></pre>
+<p>在这个例子中，问题看起来显而易见。但在某些情况下如果你脑子里“跳出”class组件的解决办法，你的直觉很可能会欺骗你。</p>
+<p>举个例子，我们来写一个每秒递增的计数器。在Class组件中，我们的直觉是：“开启一次定时器，清除也是一次”。<br>
+当我们理所当然地把它用<code>useEffect</code>的方式翻译，直觉上我们会设置依赖为<code>[]</code>。“我只想运行一次effect”，对吗？</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> [count, setCount] = <span class="hljs-title function_">useState</span>(<span class="hljs-number">0</span>);
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> id = <span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-title function_">setCount</span>(count + <span class="hljs-number">1</span>);
+    }, <span class="hljs-number">1000</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">clearInterval</span>(id);
+  }, []);
+
+  <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>{count}<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>;
+}
+</code></pre>
+<p>然而，上面这个例子只会递增一次（从0-&gt;1）。<br>
+如果你的心智模型是“只有当我想重新触发effect的时候才需要去设置依赖”，这个例子可能会让你产生怀疑。</p>
+<p>如果你知道依赖是我们给React的暗示，告诉它effect所有需要使用的渲染中的值，你就不会吃惊了。effect中使用了<code>count</code>但我们撒谎说它没有依赖。</p>
+<p>在第一次渲染中，<code>count</code>是<code>0</code>。因此，<code>setCount(count + 1)</code>在第一次渲染中等价于<code>setCount(0 + 1)</code>。既然我们设置了<code>[]</code>依赖，effect不会再重新运行，它后面每一秒都会调用<code>setCount(0 + 1)</code>:</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-comment">// 首次渲染，count = 0</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-comment">// ...</span>
+  <span class="hljs-title function_">useEffect</span>(
+    <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-keyword">const</span> id = <span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-title function_">setCount</span>(<span class="hljs-number">0</span> + <span class="hljs-number">1</span>); <span class="hljs-comment">// 永远是 setCount(1)</span>
+      }, <span class="hljs-number">1000</span>);
+      <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">clearInterval</span>(id);
+    },
+    [] <span class="hljs-comment">// 永远不会重新运行</span>
+  );
+  <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-comment">// 下一次渲染, count = 1</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-comment">// ...</span>
+  <span class="hljs-title function_">useEffect</span>(
+    <span class="hljs-comment">// 这个effect无法重新执行</span>
+    <span class="hljs-comment">// 因为我们欺骗React这个effect无需依赖</span>
+    <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-keyword">const</span> id = <span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-title function_">setCount</span>(<span class="hljs-number">1</span> + <span class="hljs-number">1</span>);
+      }, <span class="hljs-number">1000</span>);
+      <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">clearInterval</span>(id);
+    },
+    []
+  );
+  <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>我们对React撒谎说我们的effect不依赖组件内的任何值，可实际上我们的effect有依赖！</p>
+<p>我们的effect依赖count - 它是组件内的值（不过在effect外面定义）：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">const</span> count = <span class="hljs-comment">// ...</span>
+
+<span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> id = <span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-title function_">setCount</span>(count + <span class="hljs-number">1</span>);
+    }, <span class="hljs-number">1000</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">clearInterval</span>(id);
+}, []);
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<h3 id="6" tabindex="-1"><a class="header-anchor" href="#6">#</a>两种诚实告知依赖的方法</h3>
+<p>有两种诚实告知React所需依赖的策略。你应该从第一种开始，然后在需要的时候应用第二种。</p>
+<p>第一种策略是在依赖中包含所有effect中用到的组件内的值。让我们在依赖中包含<code>count</code>:</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> id = <span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">setCount</span>(count + <span class="hljs-number">1</span>);
+  }, <span class="hljs-number">1000</span>);
+  <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">clearInterval</span>(id);
+}, [count]);
+</code></pre>
+<p>现在依赖数组正确了,虽然它可能不是太理想但确实解决了上面的问题。现在，每次count修改都会重新运行effect，并且定时器中的<code>setCount(count + 1)</code>会正确引用某次渲染中的 count值。<br>
+这能解决问题但是我们的定时器会在每一次count改变后清除和重新设定。这应该不是我们想要的结果。</p>
+<p>第二种策略是修改effect内部的代码以确保它包含的值只会在需要的时候发生变更。我们不想告知错误的依赖 - 我们只是修改effect使得依赖更少。</p>
+<hr>
+<h3 id="effects-1" tabindex="-1"><a class="header-anchor" href="#effects-1">#</a>让Effects自给自足</h3>
+<p>我们想去掉effect的<code>count</code>依赖，为了实现这个目的，我们需要问自己一个问题：我们为什么要用<code>count</code>？可以看到我们只在<code>setCount</code>调用中用到了<code>count</code>。在这个场景中，我们其实并不需要在effect中使用<code>count</code>。当我们想要根据前一个状态更新状态的时候，我们可以使用<code>setState</code>的函数形式：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> id = <span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-title function_">setCount</span>(<span class="hljs-function"><span class="hljs-params">c</span> =&gt;</span> c + <span class="hljs-number">1</span>);
+    }, <span class="hljs-number">1000</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">clearInterval</span>(id);
+}, []);
+</code></pre>
+<p>我们需要告知React的仅仅是去递增状态 - 不管它现在具体是什么值(实际上React已经知道当前的<code>count</code>值)。这正是<code>setCount(c =&gt; c + 1)</code>做的事情。你可以认为它是在给React“发送指令”告知如何更新状态。这种“更新形式”在其他情况下也有帮助，比如你需要批量更新。</p>
+<p>尽管effect只运行了一次，第一次渲染中的定时器回调函数可以完美地在每次触发的时候给React发送<code>c =&gt; c + 1</code>更新指令。它不再需要知道当前的<code>count</code>值, 因为React已经知道了。</p>
+<h3 id="actions" tabindex="-1"><a class="header-anchor" href="#actions">#</a>解耦来自Actions的更新</h3>
+<p>即使是<code>setCount(c =&gt; c + 1)</code>也并不完美。它看起来有点怪，并且非常受限于它能做的事。举个例子，如果我们有两个互相依赖的状态，或者我们想基于一个prop来计算下一次的state，它并不能做到。幸运的是， <code>setCount(c =&gt; c + 1)</code>有一个更强大的姐妹模式，它的名字叫<code>useReducer</code>。</p>
+<p>我们来修改上面的例子让它包含两个状态：<code>count</code> 和 <code>step</code>。我们的定时器会每次在<code>count</code>上增加一个<code>step</code>值：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> [count, setCount] = <span class="hljs-title function_">useState</span>(<span class="hljs-number">0</span>);
+  <span class="hljs-keyword">const</span> [step, setStep] = <span class="hljs-title function_">useState</span>(<span class="hljs-number">1</span>);
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> id = <span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-title function_">setCount</span>(<span class="hljs-function"><span class="hljs-params">c</span> =&gt;</span> c + step);
+    }, <span class="hljs-number">1000</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">clearInterval</span>(id);
+  }, [step]);
+
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>{count}<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{step}</span> <span class="hljs-attr">onChange</span>=<span class="hljs-string">{e</span> =&gt;</span> setStep(Number(e.target.value))} /&gt;
+    <span class="hljs-tag">&lt;/&gt;</span></span>
+  );
+}
+</code></pre>
+<p>这个例子目前的行为是修改<code>step</code>会重启定时器 - 因为它是依赖项之一。在大多数场景下，这正是你所需要的。清除上一次的effect然后重新运行新的effect并没有任何错。除非我们有很好的理由，我们不应该改变这个默认行为。<br>
+不过，假如我们不想在<code>step</code>改变后重启定时器，我们该如何从effect中移除对<code>step</code>的依赖呢？</p>
+<p><strong>当你想更新一个状态，并且这个状态更新依赖于另一个状态的值时，你可能需要用<code>useReducer</code>去替换它们。</strong></p>
+<p>我们用一个<code>dispatch</code>依赖去替换effect的<code>step</code>依赖:</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">const</span> initialState = {
+  <span class="hljs-attr">count</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">step</span>: <span class="hljs-number">1</span>,
+};
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">reducer</span>(<span class="hljs-params">state, action</span>) {
+  <span class="hljs-keyword">const</span> { count, step } = state;
+  <span class="hljs-keyword">if</span> (action.<span class="hljs-property">type</span> === <span class="hljs-string">&#x27;tick&#x27;</span>) {
+    <span class="hljs-keyword">return</span> { <span class="hljs-attr">count</span>: count + step, step };
+  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (action.<span class="hljs-property">type</span> === <span class="hljs-string">&#x27;step&#x27;</span>) {
+    <span class="hljs-keyword">return</span> { count, <span class="hljs-attr">step</span>: action.<span class="hljs-property">step</span> };
+  } <span class="hljs-keyword">else</span> {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>();
+  }
+}
+
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> [state, dispatch] = <span class="hljs-title function_">useReducer</span>(reducer, initialState);
+  <span class="hljs-keyword">const</span> { count, step } = state;
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> id = <span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-title function_">dispatch</span>({ <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;tick&#x27;</span> });
+    }, <span class="hljs-number">1000</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">clearInterval</span>(id);
+  }, [dispatch]);
+
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>{count}<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{step}</span> <span class="hljs-attr">onChange</span>=<span class="hljs-string">{e</span> =&gt;</span> {
+        dispatch({
+          type: &#x27;step&#x27;,
+          step: Number(e.target.value)
+        });
+      }} /&gt;
+    <span class="hljs-tag">&lt;/&gt;</span></span>
+  );
+}
+</code></pre>
+<p>你可能会问：“这怎么就更好了？”答案是<strong>React会保证<code>dispatch</code>在组件的声明周期内保持不变</strong>。所以上面例子中不再需要重新订阅定时器。（你可以从依赖中去除dispatch, setState, 和useRef包裹的值因为React会确保它们是静态的。不过你设置了它们作为依赖也没什么问题。）</p>
+<h3 id="usereducerhooks" tabindex="-1"><a class="header-anchor" href="#usereducerhooks">#</a>为什么useReducer是Hooks的作弊模式</h3>
+<p>我们已经学习到如何移除effect的依赖，不管状态更新是依赖上一个状态还是依赖另一个状态。但假如我们需要依赖props去计算下一个状态呢？举个例子，也许我们的API是<code>&lt;Counter step={1} /&gt;</code>。确定的是，在这种情况下，我们没法避免依赖<code>props.step</code> 。是吗？</p>
+<p>实际上， 我们可以避免！我们可以把reducer函数放到组件内去读取props：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params">{ step }</span>) {
+  <span class="hljs-keyword">const</span> [count, dispatch] = <span class="hljs-title function_">useReducer</span>(reducer, <span class="hljs-number">0</span>);
+
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">reducer</span>(<span class="hljs-params">state, action</span>) {
+    <span class="hljs-keyword">if</span> (action.<span class="hljs-property">type</span> === <span class="hljs-string">&#x27;tick&#x27;</span>) {
+      <span class="hljs-keyword">return</span> state + step;
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>();
+    }
+  }
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> id = <span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-title function_">dispatch</span>({ <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;tick&#x27;</span> });
+    }, <span class="hljs-number">1000</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">clearInterval</span>(id);
+  }, [dispatch]);
+
+  <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>{count}<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>;
+}
+</code></pre>
+<p>这种模式会使一些优化失效，所以你应该避免滥用它，不过如果你需要,你完全可以在reducer里面访问props。</p>
+<p>即使是在这个例子中，React也保证dispatch在每次渲染中都是一样的。 所以你可以在依赖中去掉它。它不会引起effect不必要的重复执行。</p>
+<p>你可能会疑惑：这怎么可能？在之前渲染中调用的reducer怎么“知道”新的props？答案是当你<code>dispatch</code>的时候，React只是记住了action - 它会在下一次渲染中再次调用reducer。在那个时候，新的props就可以被访问到，而且reducer调用也不是在effect里。</p>
+<p>这就是为什么我倾向认为<code>useReducer</code>是Hooks的“作弊模式”。它可以把更新逻辑和描述发生了什么分开。结果是，这可以帮助我移除不必需的依赖，避免不必要的effect调用。</p>
+<h3 id="effects-2" tabindex="-1"><a class="header-anchor" href="#effects-2">#</a>把函数移到Effects里</h3>
+<p>一个典型的误解是认为函数不应该成为依赖，举个例子，下面的代码看上去可以运行正常：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">SearchResults</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> [data, setData] = <span class="hljs-title function_">useState</span>({ <span class="hljs-attr">hits</span>: [] });
+
+  <span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">fetchData</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-title function_">axios</span>(
+      <span class="hljs-string">&#x27;https://hn.algolia.com/api/v1/search?query=react&#x27;</span>,
+    );
+    <span class="hljs-title function_">setData</span>(result.<span class="hljs-property">data</span>);
+  }
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">fetchData</span>();
+  }, []); <span class="hljs-comment">// Is this okay?</span>
+
+  <span class="hljs-comment">// ...</span>
+</code></pre>
+<p>需要明确的是，上面的代码可以正常工作。但这样做在组件日渐复杂的迭代过程中我们很难确保它在各种情况下还能正常运行。</p>
+<p>想象一下我们的代码做下面这样的分离，并且每一个函数的体量是现在的五倍：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">SearchResults</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-comment">// 想象一下这里的函数体特别庞大</span>
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">getFetchUrl</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;https://hn.algolia.com/api/v1/search?query=react&#x27;</span>;
+  }
+
+  <span class="hljs-comment">// 想象一下这里的函数体也特别庞大</span>
+  <span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">fetchData</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-title function_">axios</span>(<span class="hljs-title function_">getFetchUrl</span>());
+    <span class="hljs-title function_">setData</span>(result.<span class="hljs-property">data</span>);
+  }
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">fetchData</span>();
+  }, []);
+
+  <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>然后我们在某些函数内使用了某些state或者prop：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">SearchResults</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> [query, setQuery] = <span class="hljs-title function_">useState</span>(<span class="hljs-string">&#x27;react&#x27;</span>);
+
+  <span class="hljs-comment">// Imagine this function is also long</span>
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">getFetchUrl</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;https://hn.algolia.com/api/v1/search?query=&#x27;</span> + query;
+  }
+
+  <span class="hljs-comment">// Imagine this function is also long</span>
+  <span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">fetchData</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-title function_">axios</span>(<span class="hljs-title function_">getFetchUrl</span>());
+    <span class="hljs-title function_">setData</span>(result.<span class="hljs-property">data</span>);
+  }
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">fetchData</span>();
+  }, []);
+
+  <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>如果我们忘记去更新使用这些函数（很可能通过其他函数调用）的effects的依赖，我们的effects就不会同步props和state带来的变更。这当然不是我们想要的。</p>
+<p>幸运的是，对于这个问题有一个简单的解决方案。如果某些函数仅在effect中调用，你可以把它们的定义移到effect中：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">SearchResults</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-comment">// ...</span>
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// 我们将函数移到了effect里面</span>
+    <span class="hljs-keyword">function</span> <span class="hljs-title function_">getFetchUrl</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;https://hn.algolia.com/api/v1/search?query=react&#x27;</span>;
+    }
+    <span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">fetchData</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-title function_">axios</span>(<span class="hljs-title function_">getFetchUrl</span>());
+      <span class="hljs-title function_">setData</span>(result.<span class="hljs-property">data</span>);
+    }
+
+    <span class="hljs-title function_">fetchData</span>();
+  }, []); <span class="hljs-comment">// ✅ Deps are OK</span>
+  <span class="hljs-comment">// ...</span>
+}
+
+</code></pre>
+<p>这么做有什么好处呢？我们不再需要去考虑这些“间接依赖”。我们的依赖数组也不再撒谎：在我们的effect中确实没有再使用组件范围内的任何东西。<br>
+如果我们后面修改 getFetchUrl去使用query状态，我们更可能会意识到我们正在effect里面编辑它 - 因此，我们需要把query添加到effect的依赖里：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">SearchResults</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> [query, setQuery] = <span class="hljs-title function_">useState</span>(<span class="hljs-string">&#x27;react&#x27;</span>);
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">function</span> <span class="hljs-title function_">getFetchUrl</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;https://hn.algolia.com/api/v1/search?query=&#x27;</span> + query;
+    }
+
+    <span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">fetchData</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-title function_">axios</span>(<span class="hljs-title function_">getFetchUrl</span>());
+      <span class="hljs-title function_">setData</span>(result.<span class="hljs-property">data</span>);
+    }
+
+    <span class="hljs-title function_">fetchData</span>();
+  }, [query]); <span class="hljs-comment">// ✅ Deps are OK</span>
+
+  <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>添加这个依赖，我们不仅仅是在“取悦React”。在<code>query</code>改变后去重新请求数据是合理的。useEffect的设计意图就是要强迫你关注数据流的改变，然后决定我们的effects该如何和它同步 - 而不是忽视它直到我们的用户遇到了bug。</p>
+<h3 id="effect-1" tabindex="-1"><a class="header-anchor" href="#effect-1">#</a>但我们无法把个别函数放到effect里面</h3>
+<p>有时候你可能不想把函数移入effect里。比如，组件内有几个effect使用了相同的函数，你不想在每个effect里复制黏贴一遍这个逻辑。也或许这个函数是一个prop。</p>
+<p>在这种情况下你应该忽略对函数的依赖吗？我不这么认为。再次强调，effects不应该对它的依赖撒谎。通常我们还有更好的解决办法。一个常见的误解是，“函数从来不会改变”。但是这篇文章你读到现在，你知道这显然不是事实。实际上，在组件内定义的函数每一次渲染都在变。</p>
+<p>函数每次渲染都会改变这个事实本身就是个问题。 比如有两个effects会调用 <code>getFetchUrl</code>:</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">SearchResults</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">getFetchUrl</span>(<span class="hljs-params">query</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;https://hn.algolia.com/api/v1/search?query=&#x27;</span> + query;
+  }
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> url = <span class="hljs-title function_">getFetchUrl</span>(<span class="hljs-string">&#x27;react&#x27;</span>);
+    <span class="hljs-comment">// ... Fetch data and do something ...</span>
+  }, []); <span class="hljs-comment">// 🔴 Missing dep: getFetchUrl</span>
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> url = <span class="hljs-title function_">getFetchUrl</span>(<span class="hljs-string">&#x27;redux&#x27;</span>);
+    <span class="hljs-comment">// ... Fetch data and do something ...</span>
+  }, []); <span class="hljs-comment">// 🔴 Missing dep: getFetchUrl</span>
+
+  <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>在这个例子中，你可能不想把<code>getFetchUrl</code> 移到effects中，因为你想复用逻辑。</p>
+<p>另一方面，如果你对依赖很“诚实”，你可能会掉到陷阱里。我们的两个effects都依赖getFetchUrl，而它每次渲染都不同，所以我们的依赖数组会变得无用：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">SearchResults</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-comment">// 🔴 每一次渲染都会重新触发所有effect的执行</span>
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">getFetchUrl</span>(<span class="hljs-params">query</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;https://hn.algolia.com/api/v1/search?query=&#x27;</span> + query;
+  }
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> url = <span class="hljs-title function_">getFetchUrl</span>(<span class="hljs-string">&#x27;react&#x27;</span>);
+    <span class="hljs-comment">// ... Fetch data and do something ...</span>
+  }, [getFetchUrl]); <span class="hljs-comment">// 🚧 依赖项错误，因为依赖变化太频繁了</span>
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> url = <span class="hljs-title function_">getFetchUrl</span>(<span class="hljs-string">&#x27;redux&#x27;</span>);
+    <span class="hljs-comment">// ... Fetch data and do something ...</span>
+  }, [getFetchUrl]); <span class="hljs-comment">// 🚧 依赖项错误，因为依赖变化太频繁了</span>
+
+  <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>一个可能的解决办法是把<code>getFetchUrl</code>从依赖中去掉。但是，我不认为这是好的解决方式。这会使我们后面对数据流的改变很难被发现从而忘记去处理。这会导致类似于上面“定时器不更新值”的问题。</p>
+<p>相反的，我们有两个更简单的解决办法。</p>
+<p>第一个， 如果一个函数没有使用组件内的任何值，你应该把它提到组件外面去定义，然后就可以自由地在effects中使用：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-comment">// ✅ Not affected by the data flow</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">getFetchUrl</span>(<span class="hljs-params">query</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;https://hn.algolia.com/api/v1/search?query=&#x27;</span> + query;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">SearchResults</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> url = <span class="hljs-title function_">getFetchUrl</span>(<span class="hljs-string">&#x27;react&#x27;</span>);
+    <span class="hljs-comment">// ... Fetch data and do something ...</span>
+  }, []); <span class="hljs-comment">// ✅ Deps are OK</span>
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> url = <span class="hljs-title function_">getFetchUrl</span>(<span class="hljs-string">&#x27;redux&#x27;</span>);
+    <span class="hljs-comment">// ... Fetch data and do something ...</span>
+  }, []); <span class="hljs-comment">// ✅ Deps are OK</span>
+
+  <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>你不再需要把它设为依赖，因为它们不在渲染范围内，因此不会被数据流影响。它不可能突然意外地依赖于props或state。</p>
+<p>第二个，你也可以把它包装成<code>useCallback Hook</code>:</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">SearchResults</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-comment">// ✅ Preserves identity when its own deps are the same</span>
+  <span class="hljs-keyword">const</span> getFetchUrl = <span class="hljs-title function_">useCallback</span>(<span class="hljs-function">(<span class="hljs-params">query</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;https://hn.algolia.com/api/v1/search?query=&#x27;</span> + query;
+  }, []);  <span class="hljs-comment">// ✅ Callback deps are OK</span>
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> url = <span class="hljs-title function_">getFetchUrl</span>(<span class="hljs-string">&#x27;react&#x27;</span>);
+    <span class="hljs-comment">// ... Fetch data and do something ...</span>
+  }, [getFetchUrl]); <span class="hljs-comment">// ✅ Effect deps are OK</span>
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> url = <span class="hljs-title function_">getFetchUrl</span>(<span class="hljs-string">&#x27;redux&#x27;</span>);
+    <span class="hljs-comment">// ... Fetch data and do something ...</span>
+  }, [getFetchUrl]); <span class="hljs-comment">// ✅ Effect deps are OK</span>
+
+  <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p><code>useCallback</code>本质上是添加了一层依赖检查。它以另一种方式解决了问题 - 我们使函数本身只在需要的时候才改变，而不是去掉对函数的依赖。</p>
+<p>如果我把query添加到useCallback 的依赖中，任何调用了<code>getFetchUrl</code>的effect在query改变后都会重新运行：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">SearchResults</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> [query, setQuery] = <span class="hljs-title function_">useState</span>(<span class="hljs-string">&#x27;react&#x27;</span>);
+
+  <span class="hljs-comment">// ✅ Preserves identity until query changes</span>
+  <span class="hljs-keyword">const</span> getFetchUrl = <span class="hljs-title function_">useCallback</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;https://hn.algolia.com/api/v1/search?query=&#x27;</span> + query;
+  }, [query]);  <span class="hljs-comment">// ✅ Callback deps are OK</span>
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> url = <span class="hljs-title function_">getFetchUrl</span>();
+    <span class="hljs-comment">// ... Fetch data and do something ...</span>
+  }, [getFetchUrl]); <span class="hljs-comment">// ✅ Effect deps are OK</span>
+
+  <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>感谢<code>useCallback</code>，因为如果<code>query</code>保持不变，<code>getFetchUrl</code>也会保持不变，我们的effect也不会重新运行。但是如果query修改了，<code>getFetchUrl</code>也会随之改变，因此会重新请求数据。</p>
+<p>这正是拥抱数据流和同步思维的结果。对于通过属性从父组件传入的函数这个方法也适用：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Parent</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> [query, setQuery] = <span class="hljs-title function_">useState</span>(<span class="hljs-string">&#x27;react&#x27;</span>);
+
+  <span class="hljs-comment">// ✅ Preserves identity until query changes</span>
+  <span class="hljs-keyword">const</span> fetchData = <span class="hljs-title function_">useCallback</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> url = <span class="hljs-string">&#x27;https://hn.algolia.com/api/v1/search?query=&#x27;</span> + query;
+    <span class="hljs-comment">// ... Fetch data and return it ...</span>
+  }, [query]);  <span class="hljs-comment">// ✅ Callback deps are OK</span>
+
+  <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Child</span> <span class="hljs-attr">fetchData</span>=<span class="hljs-string">{fetchData}</span> /&gt;</span></span>
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Child</span>(<span class="hljs-params">{ fetchData }</span>) {
+  <span class="hljs-keyword">let</span> [data, setData] = <span class="hljs-title function_">useState</span>(<span class="hljs-literal">null</span>);
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">fetchData</span>().<span class="hljs-title function_">then</span>(setData);
+  }, [fetchData]); <span class="hljs-comment">// ✅ Effect deps are OK</span>
+
+  <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>因为<code>fetchData</code>只有在<code>Parent</code>的<code>query</code>状态变更时才会改变，所以我们的<code>Child</code>只会在需要的时候才去重新请求数据。</p>
+<h3 id="7" tabindex="-1"><a class="header-anchor" href="#7">#</a>函数是数据流的一部分吗？</h3>
+<p>有趣的是，这种模式在class组件中行不通，并且这种行不通恰到好处地揭示了effect和生命周期范式之间的区别。考虑下面的转换：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">class</span> <span class="hljs-title class_">Parent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Component</span> {
+  state = {
+    <span class="hljs-attr">query</span>: <span class="hljs-string">&#x27;react&#x27;</span>
+  };
+  fetchData = <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> url = <span class="hljs-string">&#x27;https://hn.algolia.com/api/v1/search?query=&#x27;</span> + <span class="hljs-variable language_">this</span>.<span class="hljs-property">state</span>.<span class="hljs-property">query</span>;
+    <span class="hljs-comment">// ... Fetch data and do something ...</span>
+  };
+  <span class="hljs-title function_">render</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Child</span> <span class="hljs-attr">fetchData</span>=<span class="hljs-string">{this.fetchData}</span> /&gt;</span></span>;
+  }
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Child</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Component</span> {
+  state = {
+    <span class="hljs-attr">data</span>: <span class="hljs-literal">null</span>
+  };
+  <span class="hljs-title function_">componentDidMount</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">props</span>.<span class="hljs-title function_">fetchData</span>();
+  }
+  <span class="hljs-title function_">componentDidUpdate</span>(<span class="hljs-params">prevProps</span>) {
+    <span class="hljs-comment">// 🔴 This condition will never be true</span>
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">props</span>.<span class="hljs-property">fetchData</span> !== prevProps.<span class="hljs-property">fetchData</span>) {
+      <span class="hljs-variable language_">this</span>.<span class="hljs-property">props</span>.<span class="hljs-title function_">fetchData</span>();
+    }
+  }
+  <span class="hljs-title function_">render</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+  }
+}
+</code></pre>
+<p>上述代码中，子组件并不会因为<code>query</code>的变化而重新请求数据。因<code>fetchData</code>是一个class方法，它不会因为状态的改变而不同。</p>
+<p>想要解决这个class组件中的难题，唯一现实可行的办法是硬着头皮把<code>query</code>本身传入<code>Child</code>组件。<code>Child</code>虽然实际并没有直接使用这个<code>query</code>的值，但能在它改变的时候触发一次重新请求：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">class</span> <span class="hljs-title class_">Parent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Component</span> {
+  state = {
+    <span class="hljs-attr">query</span>: <span class="hljs-string">&#x27;react&#x27;</span>
+  };
+  fetchData = <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> url = <span class="hljs-string">&#x27;https://hn.algolia.com/api/v1/search?query=&#x27;</span> + <span class="hljs-variable language_">this</span>.<span class="hljs-property">state</span>.<span class="hljs-property">query</span>;
+    <span class="hljs-comment">// ... Fetch data and do something ...</span>
+  };
+  <span class="hljs-title function_">render</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Child</span> <span class="hljs-attr">fetchData</span>=<span class="hljs-string">{this.fetchData}</span> <span class="hljs-attr">query</span>=<span class="hljs-string">{this.state.query}</span> /&gt;</span></span>;
+  }
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Child</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Component</span> {
+  state = {
+    <span class="hljs-attr">data</span>: <span class="hljs-literal">null</span>
+  };
+  <span class="hljs-title function_">componentDidMount</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">props</span>.<span class="hljs-title function_">fetchData</span>();
+  }
+  <span class="hljs-title function_">componentDidUpdate</span>(<span class="hljs-params">prevProps</span>) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">props</span>.<span class="hljs-property">query</span> !== prevProps.<span class="hljs-property">query</span>) {
+      <span class="hljs-variable language_">this</span>.<span class="hljs-property">props</span>.<span class="hljs-title function_">fetchData</span>();
+    }
+  }
+  <span class="hljs-title function_">render</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+  }
+}
+</code></pre>
+<p>在class组件中，函数属性本身并不是数据流的一部分。组件的方法中包含了可变的<code>this</code>变量导致我们不能确定无疑地认为它是不变的。因此，即使我们只需要一个函数，我们也必须把一堆数据传递下去仅仅是为了做“diff”。我们无法知道传入的<code>this.props.fetchData</code> 是否依赖状态，并且不知道它依赖的状态是否改变了。</p>
+<p>使用<code>useCallback</code>，函数完全可以参与到数据流中。我们可以说如果一个函数的输入改变了，这个函数就改变了。如果没有，函数也不会改变。感谢周到的<code>useCallback</code>，属性比如<code>props.fetchData</code>的改变也会自动传递下去。</p>
+<p>类似的，<code>useMemo</code>可以让我们对复杂对象做类似的事情:</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">ColorPicker</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-comment">// Doesn&#x27;t break Child&#x27;s shallow equality prop check</span>
+  <span class="hljs-comment">// unless the color actually changes.</span>
+  <span class="hljs-keyword">const</span> [color, setColor] = <span class="hljs-title function_">useState</span>(<span class="hljs-string">&#x27;pink&#x27;</span>);
+  <span class="hljs-keyword">const</span> style = <span class="hljs-title function_">useMemo</span>(<span class="hljs-function">() =&gt;</span> ({ color }), [color]);
+  <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Child</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{style}</span> /&gt;</span></span>;
+}
+</code></pre>
+<hr>
+<h3 id="8" tabindex="-1"><a class="header-anchor" href="#8">#</a>说说竞态</h3>
+<p>下面是一个典型的在class组件里发请求的例子：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">class</span> <span class="hljs-title class_">Article</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Component</span> {
+  state = {
+    <span class="hljs-attr">article</span>: <span class="hljs-literal">null</span>
+  };
+  <span class="hljs-title function_">componentDidMount</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">fetchData</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">props</span>.<span class="hljs-property">id</span>);
+  }
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">fetchData</span>(<span class="hljs-params">id</span>) {
+    <span class="hljs-keyword">const</span> article = <span class="hljs-keyword">await</span> <span class="hljs-variable constant_">API</span>.<span class="hljs-title function_">fetchArticle</span>(id);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">setState</span>({ article });
+  }
+  <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>很明显，上述代码存在一些潜在的问题，它并没有处理props更新的情况。所以第二个你能够在网上找到的经典例子是下面这样的：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">class</span> <span class="hljs-title class_">Article</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Component</span> {
+  state = {
+    <span class="hljs-attr">article</span>: <span class="hljs-literal">null</span>
+  };
+  <span class="hljs-title function_">componentDidMount</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">fetchData</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">props</span>.<span class="hljs-property">id</span>);
+  }
+  <span class="hljs-title function_">componentDidUpdate</span>(<span class="hljs-params">prevProps</span>) {
+    <span class="hljs-keyword">if</span> (prevProps.<span class="hljs-property">id</span> !== <span class="hljs-variable language_">this</span>.<span class="hljs-property">props</span>.<span class="hljs-property">id</span>) {
+      <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">fetchData</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">props</span>.<span class="hljs-property">id</span>);
+    }
+  }
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">fetchData</span>(<span class="hljs-params">id</span>) {
+    <span class="hljs-keyword">const</span> article = <span class="hljs-keyword">await</span> <span class="hljs-variable constant_">API</span>.<span class="hljs-title function_">fetchArticle</span>(id);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">setState</span>({ article });
+  }
+  <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>这显然好多了！但依旧有问题。有问题的原因是请求结果返回的顺序不能保证一致。比如我先请求 <code>{id: 10}</code>，然后更新到<code>{id: 20}</code>，但<code>{id: 20}</code>的请求更先返回。请求更早但返回更晚的情况会错误地覆盖状态值。</p>
+<p>这被叫做竞态，这在混合了<code>async</code> / <code>await</code>（假设在等待结果返回）和自顶向下数据流的代码中非常典型（props和state可能会在async函数调用过程中发生改变）。</p>
+<p>Effects并没有神奇地解决这个问题，尽管它会警告你如果你直接传了一个<code>async</code> 函数给effect。</p>
+<p>如果你使用的异步方式支持取消，那太棒了。你可以直接在清除函数中取消异步请求。</p>
+<p>或者，最简单的权宜之计是用一个布尔值来跟踪它：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Article</span>(<span class="hljs-params">{ id }</span>) {
+  <span class="hljs-keyword">const</span> [article, setArticle] = <span class="hljs-title function_">useState</span>(<span class="hljs-literal">null</span>);
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">let</span> didCancel = <span class="hljs-literal">false</span>;
+
+    <span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">fetchData</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-keyword">const</span> article = <span class="hljs-keyword">await</span> <span class="hljs-variable constant_">API</span>.<span class="hljs-title function_">fetchArticle</span>(id);
+      <span class="hljs-keyword">if</span> (!didCancel) {
+        <span class="hljs-title function_">setArticle</span>(article);
+      }
+    }
+
+    <span class="hljs-title function_">fetchData</span>();
+
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> {
+      didCancel = <span class="hljs-literal">true</span>;
+    };
+  }, [id]);
+
+  <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<hr>
+<blockquote>
+<p>转自：<a href="https://overreacted.io/a-complete-guide-to-useeffect/">a-complete-guide-to-useeffect</a></p>
+</blockquote>
+</article></section></main><section class="app-post-footer"><div class="pure-g app-post-footer--box"><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#tag" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-tags"><li><a href="/adios-blogs/tags/react/1.html" title="React">React</a></li><li><a href="/adios-blogs/tags/hooks/1.html" title="Hooks">Hooks</a></li></ul></div></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#folder" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-categories"><li><a href="/adios-blogs/categories/前端/1.html" title="前端">前端</a></li></ul></div></div></div></section><style>.scroll-btn {
+    position: fixed;
+    display: none;
+    right: 3em;
+    bottom: 4.5em;
+    width: 28px;
+    height: 28px;
+    opacity: .5;
+    cursor: pointer;
+    z-index: 1;
+}
+.scroll-btn:hover {
+    opacity: 1;
+}
+</style><span class="scroll-btn"><svg class="icon icon" aria-hidden="true" style="width:28px;height:28px;"><use xlink:href="#arrow-up" x="0" y="0" width="28" height="28"></use></svg></span><script>function getBtn() {
+    var btns = document.getElementsByClassName('scroll-btn');
+    if (btns && btns.length) return btns[0];
+    return null;
+}
+function scrollTop(btn) {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+    btn.style.display = 'none';
+}
+
+function debouce(callback, ms) {
+    var t = null;
+    return function () {
+        var args = Array.prototype.slice.call(arguments);
+        var ctx = this;
+        if (t) {
+            clearTimeout(t);
+        }
+        t = setTimeout(function () {
+                clearTimeout(t);
+                t = null;
+                callback.apply(ctx, args);
+            }, ms);
+    }
+}
+
+//- place here for dom ready
+~(function () {
+    function setStyle() {
+        var btn = getBtn();
+        var sH = window.scrollY;
+        if (btn) {
+            btn.style.display = sH > 100 ? 'inline' : 'none';
+        }
+        return btn;
+    }
+
+    var btn = setStyle();
+    if (btn) {
+        btn.addEventListener('click', function () {
+            scrollTop(this);
+        });
+        window.onscroll = debouce(setStyle, 500);
+    }
+    btns = null;
+})();</script><footer class="pure-g app-footer"><div class="pure-u-1"><div class="pure-g"><div class="pure-u-1"><abbr class="share-license" title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.">CC BY-NC 4.0</abbr><span class="copyright">&copy; wiskewu. 2022</span></div><div class="pure-u-1 last-update">站点最后更新于: 7/24/2022</div></div></div></footer></div></div></body><script src="/adios-blogs/statics/js/main.js"></script></html>

@@ -2,7 +2,7 @@
 title: React Hooks核心逻辑实现
 layout: post
 createDate: 2022-07-30 12:56
-updateDate:
+updateDate: 2022-07-30 14:58
 author: wiskewu
 categories: 前端
 tags: React, Hooks
@@ -220,6 +220,15 @@ App = MyReact.render(Counter);
 基本的实现原理就是使用一个钩子数组和一个索引，索引随着每个钩子被调用而增加，并在组件被渲染时重置钩子索引，以便下次组件渲染前能正确执行钩子。
 
 上述代码只能在单个组件上进行使用，暂未考虑多组件的情况。
+
+---
+#### 延伸
+其实从上述钩子的实现中，我们可以重新理解`React`[官方](https://zh-hans.reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level)对钩子函数使用的规则限制：
+- 只在最顶层使用Hooks
+- 只在React函数中调用Hooks（不要在普通的 JavaScript 函数中调用 Hook）
+
+##### 只在最顶层使用Hooks
+不要在循环，条件或嵌套函数中调用`Hook`，确保总是在你的`React`函数的最顶层以及任何`return`之前调用他们。遵守这条规则，你就能确保`Hook`在每一次渲染中都**按照同样的顺序**被调用。这让`React`能够在多次的`useState`和`useEffect`调用之间保持`hook`状态的正确。
 
 
 ##### 参考链接

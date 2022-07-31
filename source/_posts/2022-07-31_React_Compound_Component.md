@@ -110,7 +110,7 @@ class Toggle extends React.Component {
 ```
 
 使用示例：
-```dif
+```diff
 + const Hi = () => <h1>hello world</h1>
 function App() {
     const onToggle = () => console.log('toggle...');

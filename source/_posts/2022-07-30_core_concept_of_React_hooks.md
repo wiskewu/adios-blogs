@@ -2,7 +2,7 @@
 title: React Hooks核心逻辑实现
 layout: post
 createDate: 2022-07-30 12:56
-updateDate: 2022-07-30 14:58
+updateDate: 2022-07-31 15:14
 author: wiskewu
 categories: 前端
 tags: React, Hooks
@@ -164,7 +164,7 @@ const MyReact = (function () {
                 hooks[setStateHookIndex] = newVal;
             }
             // 下一个迭代
-            return [hook[currentHook++], setState];
+            return [hooks[currentHook++], setState];
         }
     };
 })();

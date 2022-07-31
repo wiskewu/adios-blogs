@@ -109,7 +109,7 @@
 <span class="hljs-comment">// render: { count: 2 }</span>
 
 </code></pre>
-<h4 id="1659251657613-001" tabindex="-1"><a class="header-anchor" href="#1659251657613-001">#</a>进阶</h4>
+<h4 id="1659288686930-001" tabindex="-1"><a class="header-anchor" href="#1659288686930-001">#</a>进阶</h4>
 <p>虽然上述代码中我们看似实现了<code>useState</code>、<code>useEffect</code>核心逻辑，但是它们都是只能在单例模式下运行，多个<code>useState</code>或<code>useEffect</code>将会导致逻辑混乱。<br>
 下面我们将实现一个较为完整的hooks版本，核心的要点就是使用<strong>数组+迭代+闭包</strong>：</p>
 <pre class="language-javascript" data-lang="Javascript"><code><span class="hljs-keyword">const</span> <span class="hljs-title class_">MyReact</span> = (<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
@@ -144,7 +144,7 @@
                 hooks[setStateHookIndex] = newVal;
             }
             <span class="hljs-comment">// 下一个迭代</span>
-            <span class="hljs-keyword">return</span> [hook[currentHook++], setState];
+            <span class="hljs-keyword">return</span> [hooks[currentHook++], setState];
         }
     };
 })();
@@ -209,7 +209,7 @@
 <ul>
 <li><a href="https://www.netlify.com/blog/2019/03/11/deep-dive-how-do-react-hooks-really-work/">Deep Dive: How do React hooks really work</a></li>
 </ul>
-</article></section></main><section class="app-post-footer"><div class="pure-g app-post-footer--box"><div class="pure-u-1 post-footer-updated"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>Updated at 30/07/2022 14:58</span></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#tag" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-tags"><li><a href="/adios-blogs/tags/react/1.html" title="React">React</a></li><li><a href="/adios-blogs/tags/hooks/1.html" title="Hooks">Hooks</a></li></ul></div></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#folder" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-categories"><li><a href="/adios-blogs/categories/前端/1.html" title="前端">前端</a></li></ul></div></div></div></section><style>.scroll-btn {
+</article></section></main><section class="app-post-footer"><div class="pure-g app-post-footer--box"><div class="pure-u-1 post-footer-updated"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>Updated at 31/07/2022 15:14</span></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#tag" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-tags"><li><a href="/adios-blogs/tags/react/1.html" title="React">React</a></li><li><a href="/adios-blogs/tags/hooks/1.html" title="Hooks">Hooks</a></li></ul></div></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#folder" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-categories"><li><a href="/adios-blogs/categories/前端/1.html" title="前端">前端</a></li></ul></div></div></div></section><style>.scroll-btn {
     position: fixed;
     display: none;
     right: 3em;

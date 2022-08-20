@@ -17,7 +17,7 @@ top: false
 
 #### 前期实现
 
-对于这么一个需求，我们很快就随手写下如何代码：
+对于这么一个需求，我们很快就随手写下如下代码：
 ```jsx
 import React from 'react';
 import styled from 'styled-component';

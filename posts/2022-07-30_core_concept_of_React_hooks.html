@@ -109,7 +109,7 @@
 <span class="hljs-comment">// render: { count: 2 }</span>
 
 </code></pre>
-<h4 id="1659628865979-001" tabindex="-1"><a class="header-anchor" href="#1659628865979-001">#</a>进阶</h4>
+<h4 id="1660974346923-001" tabindex="-1"><a class="header-anchor" href="#1660974346923-001">#</a>进阶</h4>
 <p>虽然上述代码中我们看似实现了<code>useState</code>、<code>useEffect</code>核心逻辑，但是它们都是只能在单例模式下运行，多个<code>useState</code>或<code>useEffect</code>将会导致逻辑混乱。<br>
 下面我们将实现一个较为完整的hooks版本，核心的要点就是使用<strong>数组+迭代+闭包</strong>：</p>
 <pre class="language-javascript" data-lang="Javascript"><code><span class="hljs-keyword">const</span> <span class="hljs-title class_">MyReact</span> = (<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
@@ -271,4 +271,4 @@ function debouce(callback, ms) {
         window.onscroll = debouce(setStyle, 500);
     }
     btns = null;
-})();</script><footer class="pure-g app-footer"><div class="pure-u-1"><div class="pure-g"><div class="pure-u-1"><abbr class="share-license" title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.">CC BY-NC 4.0</abbr><span class="copyright">&copy; wiskewu. 2022</span></div><div class="pure-u-1 last-update">站点最后更新于: 8/4/2022</div></div></div></footer></div></div></body><script src="/adios-blogs/statics/js/main.js"></script></html>
+})();</script><footer class="pure-g app-footer"><div class="pure-u-1"><div class="pure-g"><div class="pure-u-1"><abbr class="share-license" title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.">CC BY-NC 4.0</abbr><span class="copyright">&copy; wiskewu. 2022</span></div><div class="pure-u-1 last-update">站点最后更新于: 8/20/2022</div></div></div></footer></div></div></body><script src="/adios-blogs/statics/js/main.js"></script></html>

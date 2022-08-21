@@ -1,0 +1,148 @@
+<html lang="zh"><head><title>Adiós Blog - 为什么React元素有一个$$typeof属性？</title><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="Adiós的个人博客网站"/><meta name="author"/><meta name="kewords" content="Adiós's independent blog"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss-min@2.1.0.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-base-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-grids-responsive-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/theme.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/layout.css"/><link rel="apple-touch-icon" sizes="180x180" href="/adios-blogs/statics/icons/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/adios-blogs/statics/icons/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/adios-blogs/statics/icons/favicon-16x16.png"/><link rel="manifest" href="/adios-blogs/statics/icons/site.webmanifest"/><link id="hl-github" rel="stylesheet" href="/adios-blogs/statics/css/highlight.js/github.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/markdown.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/post.css"/></head><body class="theme-light"><div id="app"><div id="app-container"><header class="app-post-header pure-g"><div class="pure-u-1"><div class="pure-g app-post-header--box"><h1 class="pure-u-1 post-header-title">为什么React元素有一个$$typeof属性？</h1><div class="pure-u-1 post-header-info"><p class="post-header-info--created"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>21/08/2022 09:20</span></p><span class="post-header-info--divider">·</span><p class="post-header-info--author"><svg class="icon icon" aria-hidden="true"><use xlink:href="#pencil-alt" x="0" y="0" width="16" height="16"></use></svg><span>wiskewu</span></p></div></div></div></header><div class="pure-g app-post-navigation"><span click="toggleTheme()"><a href="/adios-blogs/"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#home" x="0" y="0" width="24" height="24"></use></svg></a></span><span class="theme-btn" onclick="toggleTheme(this)"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#sun" x="0" y="0" width="24" height="24"></use></svg></span></div><hr/><main class="app-body"><section class="app-post-body"><article class="markdown app-post-body-content"><h4 id="1661046506896-001" tabindex="-1"><a class="header-anchor" href="#1661046506896-001">#</a>前言</h4>
+<p>在写JSX代码时：</p>
+<pre class="language-jsx" data-lang="Javascript"><code>&lt;marquee bgcolor=<span class="hljs-string">&quot;#ffa7c4&quot;</span>&gt;hi&lt;/marquee&gt;
+</code></pre>
+<p>实际上我们是在调用一个方法：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-title class_">React</span>.<span class="hljs-title function_">createElement</span>(
+  <span class="hljs-comment">/* type */</span> <span class="hljs-string">&#x27;marquee&#x27;</span>,
+  <span class="hljs-comment">/* props */</span> { <span class="hljs-attr">bgcolor</span>: <span class="hljs-string">&#x27;#ffa7c4&#x27;</span> },
+  <span class="hljs-comment">/* children */</span> <span class="hljs-string">&#x27;hi&#x27;</span>
+)
+</code></pre>
+<p><code>React.createElement</code>会返回一个对象，称为<code>React</code>元素(element)，它告诉<code>React</code>下一步应该渲染什么UI，我们写的组件则是返回一个由这些元素组成的树(tree)。</p>
+<pre class="language-js" data-lang="Javascript"><code>{
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;marquee&#x27;</span>,
+  <span class="hljs-attr">props</span>: {
+    <span class="hljs-attr">bgcolor</span>: <span class="hljs-string">&#x27;#ffa7c4&#x27;</span>,
+    <span class="hljs-attr">children</span>: <span class="hljs-string">&#x27;hi&#x27;</span>,
+  },
+  <span class="hljs-attr">key</span>: <span class="hljs-literal">null</span>,
+  <span class="hljs-attr">ref</span>: <span class="hljs-literal">null</span>,
+  <span class="hljs-attr">$$typeof</span>: <span class="hljs-title class_">Symbol</span>.<span class="hljs-title function_">for</span>(<span class="hljs-string">&#x27;react.element&#x27;</span>), <span class="hljs-comment">// 这是什么？</span>
+}
+</code></pre>
+<p>经常写<code>React</code>的同学，对<code>key</code>、<code>ref</code>、<code>props</code>、<code>type</code>都会比较熟悉。但<code>$$typeof</code>是什么？为什么用 <code>Symbol()</code>作为它的值？</p>
+<h4 id="xss" tabindex="-1"><a class="header-anchor" href="#xss">#</a>XSS攻击</h4>
+<p>在使用原生JS书写如下代码：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">const</span> messageEl = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;message&#x27;</span>);
+messageEl.<span class="hljs-property">innerHTML</span> = <span class="hljs-string">&#x27;&lt;p&gt;&#x27;</span> + message.<span class="hljs-property">text</span> + <span class="hljs-string">&#x27;&lt;/p&gt;&#x27;</span>;
+</code></pre>
+<p>这样看起来没什么问题，但是当<code>message.text</code>的值类似<code>&lt;img src onerror=&quot;stealYourPassword()&quot;&gt;</code>时，你的代码就变得没那么安全了。</p>
+<p>为什么防止此类攻击，你可以用只处理文本的<code>document.createTextNode()</code>或者<code>textContent</code>等安全的 API。你也可以事先将用户输入的内容，用转义符把潜在危险字符（<code>&lt;</code>、<code>&gt;</code>等）替换掉。</p>
+<p>尽管如此，这个问题的成本代价很高，且很难做到用户每次输入都记得转换一次。因此像React等新库会默认进行文本转义:</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-comment">// 自动转义</span>
+&lt;p&gt;
+  {message.<span class="hljs-property">text</span>}
+&lt;/p&gt;
+</code></pre>
+<p>如果<code>message.text</code>是一个带有<code>&lt;img&gt;</code>或其他标签的恶意字符串，它不会被当成真的<code>&lt;img&gt;</code>标签处理，<code>React</code>会先进行转义 然后 插入<code>DOM</code>里。所以<code>&lt;img&gt;</code>标签会以文本的形式展现出来。</p>
+<blockquote>
+<p>要在 React 元素中渲染任意 HTML，可以使用<code> dangerouslySetInnerHTML={{ __html: message.text }}</code></p>
+</blockquote>
+<h4 id="dollardollartypeof" tabindex="-1"><a class="header-anchor" href="#dollardollartypeof">#</a>$$typeof</h4>
+<p><code>React</code>元素(elements)是<code>plain object</code>。好处在于这些元素可以用来优化编译器，在<code>workers</code>之间传递 UI元素，或者将<code>JSX</code>从<code>React</code>包解耦出来。</p>
+<p>但是，如果你的服务器有允许用户存储任意<code>JSON</code>对象的漏洞，而前端需要一个字符串，这可能会发生一个问题:</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-comment">// 服务端允许用户存储 JSON</span>
+<span class="hljs-keyword">let</span> expectedTextButGotJSON = {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;div&#x27;</span>,
+  <span class="hljs-attr">props</span>: {
+    <span class="hljs-attr">dangerouslySetInnerHTML</span>: {
+      <span class="hljs-attr">__html</span>: <span class="hljs-string">&#x27;/* 要注入的任意代码 */&#x27;</span>
+    },
+  },
+  <span class="hljs-comment">// ...</span>
+};
+<span class="hljs-keyword">let</span> message = { <span class="hljs-attr">text</span>: expectedTextButGotJSON };
+
+<span class="hljs-comment">// React 0.13 中有风险</span>
+<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>
+  {message.text}
+<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+</code></pre>
+<p>在这个例子中，<code>React 0.13</code>很容易受到<code>XSS</code>攻击。<br>
+在<code>React 0.14</code>版本中，它修复了这个问题，修复手段是用<code>Symbol</code>标记每个<code>React</code>元素（element）:</p>
+<pre class="language-diff" data-lang="Diff"><code>{
+  type: &#x27;marquee&#x27;,
+  props: {
+    bgcolor: &#x27;#ffa7c4&#x27;,
+    children: &#x27;hi&#x27;,
+  },
+  key: null,
+  ref: null,
+<span class="hljs-addition">+  $$typeof: Symbol.for(&#x27;react.element&#x27;),</span>
+}
+</code></pre>
+<p>这是个有效的办法，因为<code>JSON</code>不支持<code>Symbol</code>类型，所以即使服务器存在用<code>JSON</code>作为文本返回安全漏洞，<code>JSON</code>里也不包含<code>Symbol.for('react.element')</code>。React会检测<code>element.$$typeof</code>，如果元素丢失或者无效，会拒绝处理该元素。</p>
+<p>特意用<code>Symbol.for()</code>的好处是<code>Symbols</code>通用于 <code>iframes</code>和<code>workers</code>等环境中。因此无论在多奇怪的条件下，这方案也不会影响到应用不同部分传递可信的元素。</p>
+<blockquote>
+<p>如果浏览器不支持 <code>Symbols</code>怎么办？<br>
+唉，那这种保护方案就无效了。React仍然会加上 <code>$$typeof</code>字段以保证一致性，但只是设置一个数字而已 —— <code>0xeac7</code>。<br>
+为什么是这个数字？因为<code>0xeac7</code>看起来有点像<code>「React」</code>。</p>
+</blockquote>
+<h5 id="1" tabindex="-1"><a class="header-anchor" href="#1">#</a>参考</h5>
+<ul>
+<li><a href="https://overreacted.io/zh-hans/why-do-react-elements-have-typeof-property/">why-do-react-elements-have-typeof-property</a></li>
+</ul>
+</article></section></main><section class="app-post-footer"><div class="pure-g app-post-footer--box"><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#tag" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-tags"><li><a href="/adios-blogs/tags/react/1.html" title="React">React</a></li></ul></div></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#folder" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-categories"><li><a href="/adios-blogs/categories/前端/1.html" title="前端">前端</a></li></ul></div></div></div></section><style>.scroll-btn {
+    position: fixed;
+    display: none;
+    right: 3em;
+    bottom: 4.5em;
+    width: 28px;
+    height: 28px;
+    opacity: .5;
+    cursor: pointer;
+    z-index: 1;
+}
+.scroll-btn:hover {
+    opacity: 1;
+}
+</style><span class="scroll-btn"><svg class="icon icon" aria-hidden="true" style="width:28px;height:28px;"><use xlink:href="#arrow-up" x="0" y="0" width="28" height="28"></use></svg></span><script>function getBtn() {
+    var btns = document.getElementsByClassName('scroll-btn');
+    if (btns && btns.length) return btns[0];
+    return null;
+}
+function scrollTop(btn) {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+    btn.style.display = 'none';
+}
+
+function debouce(callback, ms) {
+    var t = null;
+    return function () {
+        var args = Array.prototype.slice.call(arguments);
+        var ctx = this;
+        if (t) {
+            clearTimeout(t);
+        }
+        t = setTimeout(function () {
+                clearTimeout(t);
+                t = null;
+                callback.apply(ctx, args);
+            }, ms);
+    }
+}
+
+//- place here for dom ready
+~(function () {
+    function setStyle() {
+        var btn = getBtn();
+        var sH = window.scrollY;
+        if (btn) {
+            btn.style.display = sH > 100 ? 'inline' : 'none';
+        }
+        return btn;
+    }
+
+    var btn = setStyle();
+    if (btn) {
+        btn.addEventListener('click', function () {
+            scrollTop(this);
+        });
+        window.onscroll = debouce(setStyle, 500);
+    }
+    btns = null;
+})();</script><footer class="pure-g app-footer"><div class="pure-u-1"><div class="pure-g"><div class="pure-u-1"><abbr class="share-license" title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.">CC BY-NC 4.0</abbr><span class="copyright">&copy; wiskewu. 2022</span></div><div class="pure-u-1 last-update">站点最后更新于: 8/21/2022</div></div></div></footer></div></div></body><script src="/adios-blogs/statics/js/main.js"></script></html>

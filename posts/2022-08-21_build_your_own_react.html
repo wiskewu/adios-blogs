@@ -1,0 +1,1705 @@
+<html lang="zh"><head><title>Adiós Blog - 构建你自己的React【译】</title><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="Adiós的个人博客网站"/><meta name="author"/><meta name="kewords" content="Adiós's independent blog"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss-min@2.1.0.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-base-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-grids-responsive-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/theme.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/layout.css"/><link rel="apple-touch-icon" sizes="180x180" href="/adios-blogs/statics/icons/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/adios-blogs/statics/icons/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/adios-blogs/statics/icons/favicon-16x16.png"/><link rel="manifest" href="/adios-blogs/statics/icons/site.webmanifest"/><link id="hl-github" rel="stylesheet" href="/adios-blogs/statics/css/highlight.js/github.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/markdown.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/post.css"/></head><body class="theme-light"><div id="app"><div id="app-container"><header class="app-post-header pure-g"><div class="pure-u-1"><div class="pure-g app-post-header--box"><h1 class="pure-u-1 post-header-title">构建你自己的React【译】</h1><div class="pure-u-1 post-header-info"><p class="post-header-info--created"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>21/08/2022 13:58</span></p><span class="post-header-info--divider">·</span><p class="post-header-info--author"><svg class="icon icon" aria-hidden="true"><use xlink:href="#pencil-alt" x="0" y="0" width="16" height="16"></use></svg><span>wiskewu</span></p></div></div></div></header><div class="pure-g app-post-navigation"><span click="toggleTheme()"><a href="/adios-blogs/"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#home" x="0" y="0" width="24" height="24"></use></svg></a></span><span class="theme-btn" onclick="toggleTheme(this)"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#sun" x="0" y="0" width="24" height="24"></use></svg></span></div><hr/><main class="app-body"><section class="app-post-body"><article class="markdown app-post-body-content"><h4 id="1661671271107-001" tabindex="-1"><a class="header-anchor" href="#1661671271107-001">#</a>概要</h4>
+<p>我们将一步步地，按照实际的React架构代码（不包含优化项及非基本功能代码），从头开始重写React。</p>
+<p>如果你之前读过相关的<a href="https://engineering.hexacta.com/didact-learning-how-react-works-by-building-it-from-scratch-51007984e5c5">构建你自己的React</a>系列文章，区别是这篇文章是基于<code>React 16.8</code>, 因此我们可以使用<code>hooks</code>并去除和<code>classes</code>相关的任何代码。</p>
+<p>你可以在这个repo-<a href="https://github.com/pomber/didact">Didact</a>中找到与之前文章的一些信息及代码，同时，我们还提供了一个覆盖了相同内容的<a href="https://youtu.be/8Kc2REHdwnQ">演说视频</a>，但这篇文章已经包含了所有你想知道的内容。</p>
+<p>从零开始，在这个版本中我们将按照以下步骤逐级深入：</p>
+<ul>
+<li>步骤一：<code>createElement</code>函数</li>
+<li>步骤二：<code>render</code>函数</li>
+<li>步骤三：并发模式(Concurrent Mode)</li>
+<li>步骤四：渲染(Render)及提交(Commit)阶段</li>
+<li>步骤五：调和(Reconciliation)</li>
+<li>步骤六：函数组件</li>
+<li>步骤七：钩子(Hooks)</li>
+</ul>
+<hr>
+<h4 id="1" tabindex="-1"><a class="header-anchor" href="#1">#</a>零：回顾</h4>
+<p>首先让我们回顾一些基本概念。如果你已经对<code>React</code>、<code>JSX</code>和<code>DOM</code>元素的工作方式有了很好的了解，则可以跳过这一步。</p>
+<p>从一个基本的<code>React</code>应用开始，我们只需三行代码。第一行声明一个<code>React</code>元素，第二行获取dom节点，第三行将元素渲染到节点上：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">const</span> element = <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span> <span class="hljs-attr">title</span>=<span class="hljs-string">&quot;foo&quot;</span>&gt;</span>Hello<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>;
+<span class="hljs-keyword">const</span> container = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;root&quot;</span>);
+<span class="hljs-title class_">ReactDOM</span>.<span class="hljs-title function_">render</span>(element, container);
+</code></pre>
+<p>第一行我们用<code>JSX</code>定义了React元素，但它并不是合法的JS代码，所以我们将用合法的原生JS代码去替换它, JSX由如<code>Babel</code>这类编译工具转换成JS，转换过程通过比较简单：调用<code>createElement</code>函数，传递标签名、属性、子元素作为参数，替换标签内的代码。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">const</span> element = <span class="hljs-title class_">React</span>.<span class="hljs-title function_">createElement</span>(
+  <span class="hljs-string">&quot;h1&quot;</span>,
+  { <span class="hljs-attr">title</span>: <span class="hljs-string">&quot;foo&quot;</span> },
+  <span class="hljs-string">&quot;Hello&quot;</span>
+);
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<p><code>React.createElement</code>从参数中创建出一个对象，除了一些校验之外，这就是它所作的一切了。所以我们可以安全地使用类似于它的输出对象来替换这个函数调用。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">const</span> element = {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;h1&quot;</span>,
+  <span class="hljs-attr">props</span>: {
+    <span class="hljs-attr">title</span>: <span class="hljs-string">&quot;foo&quot;</span>,
+    <span class="hljs-attr">children</span>: <span class="hljs-string">&quot;Hello&quot;</span>,
+  },
+}
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<p>这就是这个React元素的样貌了，一个拥有<code>type</code>和<code>props</code>两个属性的简单对象(当然了，实际上元素拥有更多属性，但我们这里只需关心这两个属性)。</p>
+<p><code>type</code>是一个表明待创建的dom节点元素类型的字符串，值是我们传递给<code>React.createElement</code>函数的HTML标签名。它也可以是一个函数，我们在步骤七中会讲到。</p>
+<p><code>props</code>是一个对象，包含了JSX属性上所有的键值，同时它也包含了一个特殊的键：<code>children</code>。</p>
+<p><code>children</code>在上述示例中是一个字符串，但它通常是一个包含更多元素的数组，这也就是为何React元素<code>elements</code>也是一个树<code>tree</code>。</p>
+<p>另一个我们需要替换的代码片段是<code>ReactDOM.render</code>，<code>render</code>是React修改DOM节点的地方，我们将替换为自己的代码：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">const</span> element = {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;h1&quot;</span>,
+  <span class="hljs-attr">props</span>: {
+    <span class="hljs-attr">title</span>: <span class="hljs-string">&quot;foo&quot;</span>,
+    <span class="hljs-attr">children</span>: <span class="hljs-string">&quot;Hello&quot;</span>,
+  },
+};
+​
+<span class="hljs-keyword">const</span> container = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;root&quot;</span>);
+​
+<span class="hljs-keyword">const</span> node = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(element.<span class="hljs-property">type</span>);
+node[<span class="hljs-string">&quot;title&quot;</span>] = element.<span class="hljs-property">props</span>.<span class="hljs-property">title</span>;
+​
+<span class="hljs-keyword">const</span> text = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createTextNode</span>(<span class="hljs-string">&quot;&quot;</span>);
+text[<span class="hljs-string">&quot;nodeValue&quot;</span>] = element.<span class="hljs-property">props</span>.<span class="hljs-property">children</span>;
+
+node.<span class="hljs-title function_">appendChild</span>(text);
+container.<span class="hljs-title function_">appendChild</span>(node);
+</code></pre>
+<p>在这个例子中，我们使用元素的<code>type</code>（此例是h1）创建节点，然后将元素的所有<code>props</code>设置到节点上（此例只有title）。</p>
+<blockquote>
+<p>为避免疑惑，我们将使用&quot;元素&quot;指代React元素，使用&quot;节点&quot;指代DOM元素。</p>
+</blockquote>
+<p>接着我们为子元素创建对应节点，此例我们只有一个字符串所以我们创建一个文本节点。使用<code>textNode</code>代替<code>innerText</code>将有助于后续我们使用相同的方式处理所有元素。同时注意此处我们是如何像给<code>h1</code>设置title般设置<code>nodeValue</code>的，让这个字符串元素看起来好像真的拥有<code>props: { nodeValue: &quot;hello&quot; }</code>属性一样。</p>
+<p>最后，我们将这个文本节点添加至h1节点，h1节点添加至容器节点。</p>
+<p>至此，我们已经使用原生JS实现和最初的React应用一样的功能。</p>
+<h4 id="creteelement" tabindex="-1"><a class="header-anchor" href="#creteelement">#</a>壹：<code>creteElement</code>函数</h4>
+<p>让我们从另一个React应用入手，这一次我们将替换React代码为我们自己的React实现。</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">const</span> element = (
+  <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;foo&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">a</span>&gt;</span>bar<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">b</span> /&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+);
+<span class="hljs-keyword">const</span> container = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;root&quot;</span>);
+<span class="hljs-title class_">ReactDOM</span>.<span class="hljs-title function_">render</span>(element, container);
+</code></pre>
+<p>我们先从实现<code>createElement</code>开始吧，我们将转换JSX到JS，这样方便我们看到<code>createElement</code>调用过程。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">const</span> element = <span class="hljs-title class_">React</span>.<span class="hljs-title function_">createElement</span>(
+  <span class="hljs-string">&quot;div&quot;</span>,
+  { <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;foo&quot;</span> },
+  <span class="hljs-title class_">React</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-literal">null</span>, <span class="hljs-string">&quot;bar&quot;</span>),
+  <span class="hljs-title class_">React</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&quot;b&quot;</span>)
+);
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<p>在上一步中我们知道，一个React元素是由<code>type</code>和<code>props</code>组成的对象。所以我们函数唯一要做的就是创建出这个对象。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">createElement</span>(<span class="hljs-params">type, props, ...children</span>) {
+  <span class="hljs-keyword">return</span> {
+    type,
+    <span class="hljs-attr">props</span>: {
+      ...props,
+      children,
+    },
+  }
+};
+
+<span class="hljs-keyword">const</span> element = <span class="hljs-title function_">createElement</span>(
+    <span class="hljs-string">&quot;div&quot;</span>,
+  { <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;foo&quot;</span> },
+  <span class="hljs-title function_">createElement</span>(<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-literal">null</span>, <span class="hljs-string">&quot;bar&quot;</span>),
+  <span class="hljs-title function_">createElement</span>(<span class="hljs-string">&quot;b&quot;</span>)
+);
+<span class="hljs-comment">// ... </span>
+</code></pre>
+<p>我们使用剩余操作符和剩余参数语法分别设置<code>props</code>和获取<code>children</code>。这样我们的<code>children</code>属性将永远是一个数组类型。<br>
+例如，我们的<code>createElement</code>将会有如下调用和输出：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-title function_">createElement</span>(<span class="hljs-string">&#x27;div&#x27;</span>);
+<span class="hljs-comment">// { &quot;type&quot;: &quot;div&quot;, &quot;props&quot;: { &quot;children&quot;: [] } }</span>
+
+<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&#x27;div&#x27;</span>, <span class="hljs-literal">null</span>, a);
+<span class="hljs-comment">// { &quot;type&quot;: &quot;div&quot;, &quot;props&quot;: { &quot;children&quot;: [a] } }</span>
+
+<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&#x27;div&#x27;</span>, <span class="hljs-literal">null</span>, a, b);
+<span class="hljs-comment">// { &quot;type&quot;: &quot;div&quot;, &quot;props&quot;: { &quot;children&quot;: [a, b] } }</span>
+</code></pre>
+<p><code>children</code>数组可以包含像字符串和数字这种原始值，所以我们将创建一个特殊的类型为<code>TEXT_ELEMENT</code>的元素来包裹这些原始值。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">createElement</span>(<span class="hljs-params">type, props, ...children</span>) {
+  <span class="hljs-keyword">return</span> {
+    type,
+    <span class="hljs-attr">props</span>: {
+      ...props,
+      <span class="hljs-attr">children</span>: children.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">child</span> =&gt;</span>
+        <span class="hljs-keyword">typeof</span> child === <span class="hljs-string">&quot;object&quot;</span>
+          ? child
+          : <span class="hljs-title function_">createTextElement</span>(child)
+      ),
+    },
+  }
+};
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">createTextElement</span>(<span class="hljs-params">text</span>) {
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;TEXT_ELEMENT&quot;</span>,
+    <span class="hljs-attr">props</span>: {
+      <span class="hljs-attr">nodeValue</span>: text,
+      <span class="hljs-attr">children</span>: [],
+    },
+  }
+};
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<blockquote>
+<p>React实际上并不会包裹这些原始值，当没有任何<code>children</code>时也不会创建一个空数组。但我们此处这么做是因为这将简化我们的代码，我们要实现的库代码更倾向于简单而不是高性能。</p>
+</blockquote>
+<p>我们仍在使用<code>React.createElement</code>。为了替换它，让我们给我们的库起个名吧，这个名字不仅要听起来像React还需要有一定的教学意图含义在里头。</p>
+<p>我们将起名为<code>Didact</code>。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">createElement</span>(<span class="hljs-params"></span>) { <span class="hljs-comment">/* ... */</span> }
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Didact</span> = {
+    createElement,
+};
+<span class="hljs-keyword">const</span> element = <span class="hljs-title class_">Didact</span>.<span class="hljs-title function_">createElement</span>(
+  <span class="hljs-string">&quot;div&quot;</span>,
+  { <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;foo&quot;</span> },
+  <span class="hljs-title class_">Didact</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-literal">null</span>, <span class="hljs-string">&quot;bar&quot;</span>),
+  <span class="hljs-title class_">Didact</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&quot;b&quot;</span>)
+);
+
+<span class="hljs-keyword">const</span> container = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;root&quot;</span>);
+<span class="hljs-title class_">ReactDOM</span>.<span class="hljs-title function_">render</span>(element, container);
+</code></pre>
+<p>但这里我们仍然想要使用JSX语法，我们应该怎么做才能让<code>babel</code>在编译时使用我们<code>Didact</code>的<code>createElement</code>而不是React的<code>createElement</code>呢？</p>
+<p>如果我们像下面这样添加一条注释，当<code>babel</code>编译时，它就会使用我们<code>Didact</code>的<code>createElement</code>方法：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">/** <span class="hljs-doctag">@jsx</span> Didact.createElement */</span>
+<span class="hljs-keyword">const</span> element = (
+  <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;foo&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">a</span>&gt;</span>bar<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">b</span> /&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+);
+
+<span class="hljs-comment">// ...</span>
+
+</code></pre>
+<hr>
+<h4 id="render" tabindex="-1"><a class="header-anchor" href="#render">#</a>贰：<code>render</code>函数</h4>
+<p>接下来，我们将重写<code>ReactDOM.render</code>为我们自己的版本。</p>
+<p>目前，我们只需关心往DOM中添加节点，我们将在稍后处理节点更新和删除逻辑。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">createElement</span>(<span class="hljs-params"><span class="hljs-comment">/* ... */</span></span>) {<span class="hljs-comment">/* ... */</span>}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">element, container</span>) {
+  <span class="hljs-comment">// TODO create dom nodes</span>
+}
+​
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Didact</span> = {
+  createElement,
+  render,
+};
+​
+<span class="hljs-comment">/** <span class="hljs-doctag">@jsx</span> Didact.createElement */</span>
+<span class="hljs-keyword">const</span> element = (
+  <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;foo&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">a</span>&gt;</span>bar<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">b</span> /&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+);
+
+<span class="hljs-keyword">const</span> container = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;root&quot;</span>);
+<span class="hljs-title class_">Didact</span>.<span class="hljs-title function_">render</span>(element, container);
+</code></pre>
+<p>我们首先使用元素类型创建DOM节点，然后将新节点添加到容器中:</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">element, container</span>) {
+  <span class="hljs-keyword">const</span> dom = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(element.<span class="hljs-property">type</span>);
+​
+  container.<span class="hljs-title function_">appendChild</span>(dom);
+}
+</code></pre>
+<p>我们递归地为每个子元素做同样的操作:</p>
+<pre class="language-js" data-lang="Javascript"><code>element.<span class="hljs-property">props</span>.<span class="hljs-property">children</span>.<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">child</span> =&gt;</span>
+    <span class="hljs-title function_">render</span>(child, dom);
+);
+</code></pre>
+<p>我们还需要处理文本元素，如果元素类型是 <code>TEXT_ELEMENT</code>，我们将创建一个文本节点而不是常规节点:</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">const</span> dom =
+    element.<span class="hljs-property">type</span> == <span class="hljs-string">&quot;TEXT_ELEMENT&quot;</span>
+      ? <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createTextNode</span>(<span class="hljs-string">&quot;&quot;</span>)
+      : <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(element.<span class="hljs-property">type</span>);
+</code></pre>
+<p>我们需要做的最后一件事是将元素属性分配给对应节点:</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">const</span> <span class="hljs-title function_">isProperty</span> = key =&gt; key !== <span class="hljs-string">&quot;children&quot;</span>;
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(element.<span class="hljs-property">props</span>)
+    .<span class="hljs-title function_">filter</span>(isProperty)
+    .<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">name</span> =&gt;</span> {
+        dom[name] = element.<span class="hljs-property">props</span>[name];
+    });
+</code></pre>
+<p>就这样，我们现在已经拥有一个可以将JSX渲染到DOM的库了:</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">createElement</span>(<span class="hljs-params">type, props, ...children</span>) {
+  <span class="hljs-keyword">return</span> {
+    type,
+    <span class="hljs-attr">props</span>: {
+      ...props,
+      <span class="hljs-attr">children</span>: children.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">child</span> =&gt;</span>
+        <span class="hljs-keyword">typeof</span> child === <span class="hljs-string">&quot;object&quot;</span> ? child : <span class="hljs-title function_">createTextElement</span>(child)
+      )
+    }
+  };
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">createTextElement</span>(<span class="hljs-params">text</span>) {
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;TEXT_ELEMENT&quot;</span>,
+    <span class="hljs-attr">props</span>: {
+      <span class="hljs-attr">nodeValue</span>: text,
+      <span class="hljs-attr">children</span>: []
+    }
+  };
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">element, container</span>) {
+  <span class="hljs-keyword">const</span> dom =
+    element.<span class="hljs-property">type</span> == <span class="hljs-string">&quot;TEXT_ELEMENT&quot;</span>
+      ? <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createTextNode</span>(<span class="hljs-string">&quot;&quot;</span>)
+      : <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(element.<span class="hljs-property">type</span>);
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">isProperty</span> = key =&gt; key !== <span class="hljs-string">&quot;children&quot;</span>;
+  <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(element.<span class="hljs-property">props</span>)
+    .<span class="hljs-title function_">filter</span>(isProperty)
+    .<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">name</span> =&gt;</span> {
+      dom[name] = element.<span class="hljs-property">props</span>[name];
+    });
+  element.<span class="hljs-property">props</span>.<span class="hljs-property">children</span>.<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">child</span> =&gt;</span> <span class="hljs-title function_">render</span>(child, dom));
+  container.<span class="hljs-title function_">appendChild</span>(dom);
+}
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Didact</span> = {
+  createElement,
+  render
+};
+
+<span class="hljs-comment">/** <span class="hljs-doctag">@jsx</span> Didact.createElement */</span>
+<span class="hljs-keyword">const</span> element = (
+  <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;background: salmon&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Hello World<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">h2</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;text-align:right&quot;</span>&gt;</span>from Didact<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+);
+<span class="hljs-keyword">const</span> container = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;root&quot;</span>);
+<span class="hljs-title class_">Didact</span>.<span class="hljs-title function_">render</span>(element, container);
+</code></pre>
+<blockquote>
+<p>在<a href="https://codesandbox.io/s/didact-2-k6rbj">codesandbox</a>上试一试。</p>
+</blockquote>
+<hr>
+<h4 id="2" tabindex="-1"><a class="header-anchor" href="#2">#</a>叁：并发模式</h4>
+<p>但是…在我们添加更多代码前我们需要重构我们的代码。</p>
+<p>我们递归调用中存在一个问题。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">element, container</span>) {
+    <span class="hljs-comment">// ...</span>
+    element.<span class="hljs-property">props</span>.<span class="hljs-property">children</span>.<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">child</span> =&gt;</span>
+        <span class="hljs-title function_">render</span>(child, dom);
+    );
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>一旦我们开始渲染，直到我们渲染完整个元素树前我们都不会停止。如果元素树很大，它可能会阻塞主线程太长时间。而如果浏览器需要做一些高优先级的事情，比如处理用户输入或保持动画的流畅性，它就必须等到渲染完成。</p>
+<p>所以我们要把工作分成几个小单元，在完成每个单元后，如果还有什么其他需要做的(高优先级)，我们会让浏览器中断渲染:</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">let</span> nextUnitOfWork = <span class="hljs-literal">null</span>;
+​
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">workLoop</span>(<span class="hljs-params">deadline</span>) {
+  <span class="hljs-comment">// 是否应该暂停渲染并等待</span>
+  <span class="hljs-keyword">let</span> shouldYield = <span class="hljs-literal">false</span>;
+  <span class="hljs-keyword">while</span> (nextUnitOfWork &amp;&amp; !shouldYield) {
+    nextUnitOfWork = <span class="hljs-title function_">performUnitOfWork</span>(
+      nextUnitOfWork
+    );
+    <span class="hljs-comment">// 无可用空闲时间，则进入等待</span>
+    shouldYield = deadline.<span class="hljs-title function_">timeRemaining</span>() &lt; <span class="hljs-number">1</span>;
+  }
+  <span class="hljs-title function_">requestIdleCallback</span>(workLoop);
+}
+​
+<span class="hljs-title function_">requestIdleCallback</span>(workLoop);
+​
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">performUnitOfWork</span>(<span class="hljs-params">nextUnitOfWork</span>) {
+  <span class="hljs-comment">// TODO</span>
+}
+</code></pre>
+<p>我们使用<code>requestIdleCallback</code>来做一个循环。你可以把<code>requestIdleCallback</code>视为<code>setTimeout</code>，但不是我们告诉它何时运行，而是浏览器在主线程空闲时运行回调。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">workLoop</span>(<span class="hljs-params">deadline</span>) {
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-title function_">requestIdleCallback</span>(workLoop);
+}
+
+<span class="hljs-title function_">requestIdleCallback</span>(workLoop);
+</code></pre>
+<blockquote>
+<p>React 已经<a href="https://github.com/facebook/react/issues/11171#issuecomment-417349573">不再使用<code>requestIdleCallback</code></a>了，现在React使用<a href="https://github.com/facebook/react/tree/master/packages/scheduler"><code>scheduler package</code></a>来实现。但对于我们理解来说，在概念上是等同的。</p>
+</blockquote>
+<p>我们可以从<code>requestIdleCallback</code>获得一个<code>deadline</code>参数。我们可以使用它来检查在浏览器重新掌握控制权前还剩多少可利用时间。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">let</span> nextUnitOfWork = <span class="hljs-literal">null</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">workLoop</span>(<span class="hljs-params">deadline</span>) {
+  <span class="hljs-keyword">let</span> shouldYield = <span class="hljs-literal">false</span>;
+  <span class="hljs-keyword">while</span> (nextUnitOfWork &amp;&amp; !shouldYield) {
+    <span class="hljs-comment">// ...</span>
+    shouldYield = deadline.<span class="hljs-title function_">timeRemaining</span>() &lt; <span class="hljs-number">1</span>;
+  }
+  <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>截至2019年11月份，React中的并发模式还不稳定。循环的稳定版本看起来更像这样：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">while</span> (nextUnitOfWork) {    
+  nextUnitOfWork = <span class="hljs-title function_">performUnitOfWork</span>(   
+    nextUnitOfWork  
+  );
+}
+</code></pre>
+<p>要开始循环，我们需要设置第一个工作单元，然后编写一个<code>performUnitOfWork</code>函数，它不仅要执行工作，还要返回下一个工作单元。</p>
+<pre class="language-js" data-lang="Javascript"><code>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">workLoop</span>(<span class="hljs-params">deadline</span>) {
+    <span class="hljs-comment">// ...</span>
+    nextUnitOfWork = <span class="hljs-title function_">performUnitOfWork</span>(
+        nextUnitOfWork
+    );
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">performUnitOfWork</span>(<span class="hljs-params">nextUnitOfWork</span>) {
+  <span class="hljs-comment">// TODO execute and return next unit</span>
+}
+
+</code></pre>
+<hr>
+<h4 id="fibers" tabindex="-1"><a class="header-anchor" href="#fibers">#</a>肆：Fibers</h4>
+<p>要组织这些工作单元，我们需要一种数据结构：一个<code>fiber</code>树。</p>
+<p>对于每一个元素我们将会有一个<code>fiber</code>，每个<code>fiber</code>将会代表一个工作单元(unit of work)。</p>
+<p><img src="/adios-blogs/assets/posts/202208/20220821-react-fiber-01.png" alt="Fiber Tree"></p>
+<p>下面我将使用一个例子来讲解。</p>
+<p>假设我们想要渲染一个像这样的元素树：</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-title class_">Didact</span>.<span class="hljs-title function_">render</span>(
+  <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">p</span> /&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">a</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">h2</span> /&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>,
+  container
+);
+</code></pre>
+<p>在渲染时，我们将创建根<code>fiber</code>并将其设置为 <code>nextUnitOfWork</code>。剩下的工作将发生在<code>performUnitOfWork</code>函数上，我们将为每个<code>Fiber</code>做三件事：</p>
+<ol>
+<li>将(根)元素添加至DOM</li>
+<li>为(根)元素的子元素创建<code>fibers</code></li>
+<li>选择下一个工作单元</li>
+</ol>
+<p><code>fiber</code>这种数据结构的目的之一是更方便地找到下一个工作单元。这也就是为什么<strong>每个<code>fiber</code>都有一个指向子<code>fiber</code>(child)的索引、一个指向相邻<code>fiber</code>(sibling)的索引、一个指向它父<code>fiber</code>(parent)的索引</strong>。</p>
+<p><img src="/adios-blogs/assets/posts/202208/20220821-react-fiber-02.png" alt="Fiber Tree"></p>
+<p>当我们完成对光纤的工作时，如果它有一个子<code>fiber</code>，那么该<code>fiber</code>将成为下一个工作单元。</p>
+<p><img src="/adios-blogs/assets/posts/202208/20220821-react-fiber-03.png" alt="Fiber Child"></p>
+<p>在我们的示例中，当我们完成<code>div</code>这个<code>fiber</code>的工作时，下一个工作单元将是<code>h1</code>这个<code>fiber</code>。</p>
+<p>如果当前<code>fiber</code>没有子<code>fiber</code>，我们将其兄弟姐妹用作下一个工作单元。</p>
+<p><img src="/adios-blogs/assets/posts/202208/20220821-react-fiber-04.png" alt="Fiber sibling"></p>
+<p>例如，<code>p</code>元素的<code>fiber</code>没有子<code>fiber</code>，所以我们在完成它后移动到<code>a</code>元素的<code>fiber</code>上作为下一个工作单元。</p>
+<p>如果<code>fiber</code>既没有孩子也没有兄弟姐妹，我们就去找&quot;叔叔&quot;：父母的兄弟姐妹<code>fiber</code>。</p>
+<p><img src="/adios-blogs/assets/posts/202208/20220821-react-fiber-05.png" alt="Fiber sibling of parent"></p>
+<p>就像示例中<code>a</code>和<code>h2</code>代表的<code>fiber</code>。</p>
+<p>此外，如果父母没有兄弟姐妹，我们会继续向上查找父母，直到我们找到一个有兄弟姐妹的<code>fiber</code>或直到我们到达根<code>fiber</code>。如果我们到达了根<code>fiber</code>，这意味着我们已经完成了这个渲染的所有工作。</p>
+<p>现在，让我们将上述逻辑写到代码中。</p>
+<p>首先，让我们先将部分代码从<code>render</code>中抽离到<code>createDom</code>中，在稍后我们将会用到它:</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">createDOM</span>(<span class="hljs-params">fiber</span>) {
+    <span class="hljs-keyword">const</span> dom =
+        fiber.<span class="hljs-property">type</span> == <span class="hljs-string">&quot;TEXT_ELEMENT&quot;</span>
+        ? <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createTextNode</span>(<span class="hljs-string">&quot;&quot;</span>)
+        : <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(fiber.<span class="hljs-property">type</span>);
+​
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">isProperty</span> = key =&gt; key !== <span class="hljs-string">&quot;children&quot;</span>;
+  <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(fiber.<span class="hljs-property">props</span>)
+    .<span class="hljs-title function_">filter</span>(isProperty)
+    .<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">name</span> =&gt;</span> {
+      dom[name] = fiber.<span class="hljs-property">props</span>[name];
+    });
+​
+  <span class="hljs-keyword">return</span> dom;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">element, container</span>) {
+    <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> set next unit of work</span>
+}
+
+<span class="hljs-keyword">let</span> nextUnitOfWork = <span class="hljs-literal">null</span>;
+
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<p>在<code>render</code>函数中，我们将初始化<code>nextUnitOfWork</code>为当前<code>fiber</code>树的根：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">element, container</span>) {
+  nextUnitOfWork = {
+    <span class="hljs-attr">dom</span>: container,
+    <span class="hljs-attr">props</span>: {
+      <span class="hljs-attr">children</span>: [element],
+    },
+  };
+}
+
+<span class="hljs-keyword">let</span> nextUnitOfWork = <span class="hljs-literal">null</span>;
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<p>然后，当浏览器就绪，它会调用我们的<code>workLoop</code>函数，我们的工作就可以从根<code>fiber</code>开始了：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">workLoop</span>(<span class="hljs-params">deadline</span>) {
+  <span class="hljs-keyword">let</span> shouldYield = <span class="hljs-literal">false</span>;
+  <span class="hljs-keyword">while</span> (nextUnitOfWork &amp;&amp; !shouldYield) {
+    nextUnitOfWork = <span class="hljs-title function_">performUnitOfWork</span>(
+      nextUnitOfWork
+    )
+    shouldYield = deadline.<span class="hljs-title function_">timeRemaining</span>() &lt; <span class="hljs-number">1</span>;
+  }
+  <span class="hljs-title function_">requestIdleCallback</span>(workLoop);
+}
+​
+<span class="hljs-title function_">requestIdleCallback</span>(workLoop);
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">performUnitOfWork</span>(<span class="hljs-params">fiber</span>) {
+  <span class="hljs-comment">// TODO add dom node</span>
+  <span class="hljs-comment">// TODO create new fibers</span>
+  <span class="hljs-comment">// TODO return next unit of work</span>
+}
+
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<p>首先，我们创建一个新节点并将其添加到父节点<code>DOM</code>。我们在<code>Fiber.dom</code>属性中跟踪所属的<code>DOM</code>节点。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">createDom</span>(<span class="hljs-params"><span class="hljs-comment">/* ... */</span></span>) {<span class="hljs-comment">/* ... */</span>}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">performUnitOfWork</span>(<span class="hljs-params">fiber</span>) {
+  <span class="hljs-keyword">if</span> (!fiber.<span class="hljs-property">dom</span>) {
+    fiber.<span class="hljs-property">dom</span> = <span class="hljs-title function_">createDom</span>(fiber);
+  }
+​
+  <span class="hljs-keyword">if</span> (fiber.<span class="hljs-property">parent</span>) {
+    fiber.<span class="hljs-property">parent</span>.<span class="hljs-property">dom</span>.<span class="hljs-title function_">appendChild</span>(fiber.<span class="hljs-property">dom</span>);
+  }
+​
+  <span class="hljs-comment">// TODO create new fibers</span>
+  <span class="hljs-comment">// TODO return next unit of work</span>
+}
+</code></pre>
+<p>紧接着我们为每个子元素创建对应的<code>fiber</code>:</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">performUnitOfWork</span>(<span class="hljs-params">fiber</span>) {
+  <span class="hljs-comment">// ... add dom node</span>
+​
+  <span class="hljs-keyword">const</span> elements = fiber.<span class="hljs-property">props</span>.<span class="hljs-property">children</span>;
+  <span class="hljs-keyword">let</span> index = <span class="hljs-number">0</span>;
+  <span class="hljs-keyword">let</span> prevSibling = <span class="hljs-literal">null</span>;
+​
+  <span class="hljs-keyword">while</span> (index &lt; elements.<span class="hljs-property">length</span>) {
+    <span class="hljs-keyword">const</span> element = elements[index];
+​
+    <span class="hljs-keyword">const</span> newFiber = {
+      <span class="hljs-attr">type</span>: element.<span class="hljs-property">type</span>,
+      <span class="hljs-attr">props</span>: element.<span class="hljs-property">props</span>,
+      <span class="hljs-attr">parent</span>: fiber,
+      <span class="hljs-attr">dom</span>: <span class="hljs-literal">null</span>,
+    };
+  }
+​
+  <span class="hljs-comment">// TODO return next unit of work</span>
+}
+</code></pre>
+<p>我们将它添加到<code>Fiber</code>树中，将其设置为子节点<code>fiber</code>或兄弟节点<code>fiber</code>，具体取决于它是否是第一个子节点。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">performUnitOfWork</span>(<span class="hljs-params">fiber</span>) {
+  <span class="hljs-comment">// ... add dom node</span>
+​
+  <span class="hljs-keyword">const</span> elements = fiber.<span class="hljs-property">props</span>.<span class="hljs-property">children</span>;
+  <span class="hljs-keyword">let</span> index = <span class="hljs-number">0</span>;
+  <span class="hljs-comment">// 记录上一个兄弟节点</span>
+  <span class="hljs-keyword">let</span> prevSibling = <span class="hljs-literal">null</span>;
+​
+  <span class="hljs-keyword">while</span> (index &lt; elements.<span class="hljs-property">length</span>) {
+    <span class="hljs-keyword">const</span> element = elements[index];
+​
+    <span class="hljs-keyword">const</span> newFiber = {
+      <span class="hljs-attr">type</span>: element.<span class="hljs-property">type</span>,
+      <span class="hljs-attr">props</span>: element.<span class="hljs-property">props</span>,
+      <span class="hljs-attr">parent</span>: fiber,
+      <span class="hljs-attr">dom</span>: <span class="hljs-literal">null</span>,
+    };
+
+    <span class="hljs-keyword">if</span> (index === <span class="hljs-number">0</span>) {
+      fiber.<span class="hljs-property">child</span> = newFiber;
+    } <span class="hljs-keyword">else</span> {
+      prevSibling.<span class="hljs-property">sibling</span> = newFiber;
+    }
+​
+    prevSibling = newFiber;
+    index++;
+  }
+​
+  <span class="hljs-comment">// TODO return next unit of work</span>
+}
+</code></pre>
+<p>最后我们寻找下一个工作单元。我们首先检查孩子<code>fiber</code>, 然后检查兄弟姐妹<code>fiber</code>，然后检查叔叔<code>fiber</code>，依次循环。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">performUnitOfWork</span>(<span class="hljs-params">fiber</span>) {
+    <span class="hljs-comment">// ... add dom node</span>
+    <span class="hljs-comment">// ... create new fibers</span>
+    <span class="hljs-keyword">if</span> (fiber.<span class="hljs-property">child</span>) {
+        <span class="hljs-keyword">return</span> fiber.<span class="hljs-property">child</span>;
+    }
+    <span class="hljs-keyword">let</span> nextFiber = fiber;
+    <span class="hljs-keyword">while</span> (nextFiber) {
+        <span class="hljs-keyword">if</span> (nextFiber.<span class="hljs-property">sibling</span>) {
+        <span class="hljs-keyword">return</span> nextFiber.<span class="hljs-property">sibling</span>;
+        }
+        nextFiber = nextFiber.<span class="hljs-property">parent</span>;
+    }
+}
+</code></pre>
+<p>至此，我们已经完成我们的<code>performUnitOfWork</code>函数核心代码：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">performUnitOfWork</span>(<span class="hljs-params">fiber</span>) {
+  <span class="hljs-keyword">if</span> (!fiber.<span class="hljs-property">dom</span>) {
+    fiber.<span class="hljs-property">dom</span> = <span class="hljs-title function_">createDom</span>(fiber);
+  }
+​
+  <span class="hljs-keyword">if</span> (fiber.<span class="hljs-property">parent</span>) {
+    fiber.<span class="hljs-property">parent</span>.<span class="hljs-property">dom</span>.<span class="hljs-title function_">appendChild</span>(fiber.<span class="hljs-property">dom</span>);
+  }
+​
+  <span class="hljs-keyword">const</span> elements = fiber.<span class="hljs-property">props</span>.<span class="hljs-property">children</span>;
+  <span class="hljs-keyword">let</span> index = <span class="hljs-number">0</span>;
+  <span class="hljs-keyword">let</span> prevSibling = <span class="hljs-literal">null</span>;
+​
+  <span class="hljs-keyword">while</span> (index &lt; elements.<span class="hljs-property">length</span>) {
+    <span class="hljs-keyword">const</span> element = elements[index];
+​
+    <span class="hljs-keyword">const</span> newFiber = {
+      <span class="hljs-attr">type</span>: element.<span class="hljs-property">type</span>,
+      <span class="hljs-attr">props</span>: element.<span class="hljs-property">props</span>,
+      <span class="hljs-attr">parent</span>: fiber,
+      <span class="hljs-attr">dom</span>: <span class="hljs-literal">null</span>,
+    };
+​
+    <span class="hljs-keyword">if</span> (index === <span class="hljs-number">0</span>) {
+      fiber.<span class="hljs-property">child</span> = newFiber;
+    } <span class="hljs-keyword">else</span> {
+      prevSibling.<span class="hljs-property">sibling</span> = newFiber;
+    }
+​
+    prevSibling = newFiber;
+    index++;
+  }
+​
+  <span class="hljs-keyword">if</span> (fiber.<span class="hljs-property">child</span>) {
+    <span class="hljs-keyword">return</span> fiber.<span class="hljs-property">child</span>;
+  }
+  <span class="hljs-keyword">let</span> nextFiber = fiber;
+  <span class="hljs-keyword">while</span> (nextFiber) {
+    <span class="hljs-keyword">if</span> (nextFiber.<span class="hljs-property">sibling</span>) {
+      <span class="hljs-keyword">return</span> nextFiber.<span class="hljs-property">sibling</span>;
+    }
+    nextFiber = nextFiber.<span class="hljs-property">parent</span>;
+  }
+}
+</code></pre>
+<hr>
+<h4 id="rendercommit" tabindex="-1"><a class="header-anchor" href="#rendercommit">#</a>伍：Render与Commit阶段</h4>
+<p>这里我们又有一个问题，每次我们处理一个元素时，我们都会向DOM添加一个新节点。但请记住，浏览器可能会在我们完成渲染整个树之前中断我们的工作。在这种情况下，用户将看到一个不完整的<code>UI</code>。这样的结果显然不是我们想要的。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">performUnitOfWork</span>(<span class="hljs-params">fiber</span>) {
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">if</span> (fiber.<span class="hljs-property">parent</span>) {
+        fiber.<span class="hljs-property">parent</span>.<span class="hljs-property">dom</span>.<span class="hljs-title function_">appendChild</span>(fiber.<span class="hljs-property">dom</span>);
+    }
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>所以这里我们需要删除改变DOM的代码部分：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">performUnitOfWork</span>(<span class="hljs-params">fiber</span>) {
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-comment">/* remove
+    if (fiber.parent) {
+        fiber.parent.dom.appendChild(fiber.dom);
+    }
+    */</span>
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>相反，我们将跟踪<code>fiber</code>的根，并将其称为’进行中的根’或<code>wipRoot</code>。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">element, container</span>) {
+    <span class="hljs-comment">// ...</span>
+    wipRoot = {
+    <span class="hljs-attr">dom</span>: container,
+    <span class="hljs-attr">props</span>: {
+      <span class="hljs-attr">children</span>: [element],
+    },
+  };
+  nextUnitOfWork = wipRoot;
+}
+
+<span class="hljs-keyword">let</span> nextUnitOfWork = <span class="hljs-literal">null</span>;
+<span class="hljs-keyword">let</span> wipRoot = <span class="hljs-literal">null</span>;
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<p>然后一旦我们完成了所有工作(我们知道何时完成，因为没有下一个待处理的工作单元)，我们提交整个<code>fiber</code>树到DOM。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">commitRoot</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> add nodes to dom</span>
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params"><span class="hljs-comment">/* ... */</span></span>){}
+
+<span class="hljs-keyword">let</span> nextUnitOfWork = <span class="hljs-literal">null</span>;
+<span class="hljs-keyword">let</span> wipRoot = <span class="hljs-literal">null</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">workLoop</span>(<span class="hljs-params">deadline</span>) {
+  <span class="hljs-keyword">let</span> shouldYield = <span class="hljs-literal">false</span>;
+  <span class="hljs-keyword">while</span> (nextUnitOfWork &amp;&amp; !shouldYield) {
+    nextUnitOfWork = <span class="hljs-title function_">performUnitOfWork</span>(
+      nextUnitOfWork
+    );
+    shouldYield = deadline.<span class="hljs-title function_">timeRemaining</span>() &lt; <span class="hljs-number">1</span>;
+  }
+​
+  <span class="hljs-keyword">if</span> (!nextUnitOfWork &amp;&amp; wipRoot) {
+    <span class="hljs-comment">// finish all. commit to dom</span>
+    <span class="hljs-title function_">commitRoot</span>();
+  }
+​
+  <span class="hljs-title function_">requestIdleCallback</span>(workLoop);
+}
+​
+<span class="hljs-title function_">requestIdleCallback</span>(workLoop);
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<p>我们将在<code>commitRoot</code>这个函数中完成提交工作，这里我们会递归地将所有节点追加到DOM。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">commitRoot</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-title function_">commitWork</span>(wipRoot.<span class="hljs-property">child</span>);
+    wipRoot = <span class="hljs-literal">null</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">commitWork</span>(<span class="hljs-params">fiber</span>) {
+    <span class="hljs-keyword">if</span> (!fiber) {
+        <span class="hljs-keyword">return</span>
+    }
+    <span class="hljs-keyword">const</span> domParent = fiber.<span class="hljs-property">parent</span>.<span class="hljs-property">dom</span>;
+    domParent.<span class="hljs-title function_">appendChild</span>(fiber.<span class="hljs-property">dom</span>);
+    <span class="hljs-title function_">commitWork</span>(fiber.<span class="hljs-property">child</span>);
+    <span class="hljs-title function_">commitWork</span>(fiber.<span class="hljs-property">sibling</span>);
+}
+
+</code></pre>
+<hr>
+<h3 id="(reconciliation)" tabindex="-1"><a class="header-anchor" href="#(reconciliation)">#</a>陆：调和(Reconciliation)</h3>
+<p>到目前为止，我们只向 DOM 添加了东西，但是更新或删除节点呢？</p>
+<p>这就是我们现在要做的，我们需要将我们在<code>render</code>函数中收到的元素与我们提交给 DOM 的最后一个<code>fiber</code>树进行比较。</p>
+<p>因此，我们需要在完成提交后保存对&quot;我们提交给 DOM 的最后一个<code>fiber</code>树&quot;的引用。我们称之为<code>currentRoot</code>。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">commitRoot</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-title function_">commitWork</span>(wipRoot.<span class="hljs-property">child</span>);
+  currentRoot = wipRoot;
+  wipRoot = <span class="hljs-literal">null</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">element, container</span>) {
+    wipRoot = {
+        <span class="hljs-attr">dom</span>: container,
+        <span class="hljs-attr">props</span>: {
+        <span class="hljs-attr">children</span>: [element],
+        },
+        <span class="hljs-attr">alternate</span>: currentRoot,
+    }
+    nextUnitOfWork = wipRoot;
+}
+
+<span class="hljs-keyword">let</span> currentRoot = <span class="hljs-literal">null</span>;
+<span class="hljs-comment">//...</span>
+</code></pre>
+<p>同时我们为每个<code>fiber</code>添加一个新的<code>alternate</code>属性。这个属性链接到一个旧的<code>fiber</code>节点，该节点存的是上一次提交阶段我们提交给DOM的内容。</p>
+<p>现在，让我们从<code>performUnitOfWork</code>函数中提取那些创建新<code>fiber</code>的代码块至一个新的<code>reconcileChildren</code>函数。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">performUnitOfWork</span>(<span class="hljs-params">fiber</span>) {
+    <span class="hljs-keyword">if</span> (!fiber.<span class="hljs-property">dom</span>) {
+        fiber.<span class="hljs-property">dom</span> = <span class="hljs-title function_">createDom</span>(fiber);
+    }
+    ​
+    <span class="hljs-keyword">const</span> elements = fiber.<span class="hljs-property">props</span>.<span class="hljs-property">children</span>;
+    <span class="hljs-title function_">reconcileChildren</span>(fiber, elements);
+​   <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">reconcileChildren</span>(<span class="hljs-params">wipFiber, elements</span>) {
+  <span class="hljs-keyword">let</span> index = <span class="hljs-number">0</span>;
+  <span class="hljs-keyword">let</span> prevSibling = <span class="hljs-literal">null</span>;
+​
+  <span class="hljs-keyword">while</span> (index &lt; elements.<span class="hljs-property">length</span>) {
+    <span class="hljs-keyword">const</span> element = elements[index];
+​
+    <span class="hljs-keyword">const</span> newFiber = {
+      <span class="hljs-attr">type</span>: element.<span class="hljs-property">type</span>,
+      <span class="hljs-attr">props</span>: element.<span class="hljs-property">props</span>,
+      <span class="hljs-attr">parent</span>: wipFiber,
+      <span class="hljs-attr">dom</span>: <span class="hljs-literal">null</span>,
+    };
+​
+    <span class="hljs-keyword">if</span> (index === <span class="hljs-number">0</span>) {
+      wipFiber.<span class="hljs-property">child</span> = newFiber;
+    } <span class="hljs-keyword">else</span> {
+      prevSibling.<span class="hljs-property">sibling</span> = newFiber;
+    }
+​
+    prevSibling = newFiber;
+    index++;
+  }
+}
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<p>在这个函数中我们将会调和旧的<code>fiber</code>与新的<code>fiber</code>之间的关系。</p>
+<p>我们同时迭代旧<code>Fiber</code>(存于<code>wipFiber.alternate</code>) 的子节点和我们想要协调的元素数组。</p>
+<p>如果我们忽略了同时遍历一个数组和一个链表所需的所有模板，<code>while</code>循环内我们就只剩下内最重要的两样东西：<code>oldFiber</code>和<code>element</code>。<strong><code>element</code>是我们要渲染到DOM中的东西，<code>oldFiber</code>是我们上次渲染的东西</strong>。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">reconcileChildren</span>(<span class="hljs-params">wipFiber, elements</span>) {
+    <span class="hljs-keyword">let</span> index = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">let</span> oldFiber =
+    wipFiber.<span class="hljs-property">alternate</span> &amp;&amp; wipFiber.<span class="hljs-property">alternate</span>.<span class="hljs-property">child</span>;
+    <span class="hljs-keyword">let</span> prevSibling = <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">while</span>(index &lt; elements.<span class="hljs-property">length</span> ||
+    oldFiber != <span class="hljs-literal">null</span>) {
+        <span class="hljs-keyword">const</span> element = elements[index];
+        <span class="hljs-keyword">let</span> newFiber = <span class="hljs-literal">null</span>;
+​
+        <span class="hljs-comment">// TODO compare oldFiber to element</span>
+        <span class="hljs-comment">// ...</span>
+    }
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>我们需要比较它们，看看是否需要对 DOM 进行任何更改。</p>
+<p>我们使用类型来比较它们：</p>
+<ul>
+<li>如果旧的<code>Fiber</code>和新的元素具有相同的类型，我们可以保留 DOM 节点并使用新的<code>props</code>更新它</li>
+<li>如果类型不同并且有一个新元素，则意味着我们需要创建一个新的 DOM 节点</li>
+<li>如果类型不同并且有<code>oldFiber</code>，我们需要删除旧节点</li>
+</ul>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">reconcileChildren</span>(<span class="hljs-params">wipFiber, elements</span>) {
+    <span class="hljs-keyword">let</span> index = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">let</span> oldFiber =
+        wipFiber.<span class="hljs-property">alternate</span> &amp;&amp; wipFiber.<span class="hljs-property">alternate</span>.<span class="hljs-property">child</span>;
+    <span class="hljs-keyword">let</span> prevSibling = <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">while</span> (index &lt; elements.<span class="hljs-property">length</span> ||
+    oldFiber != <span class="hljs-literal">null</span>) {
+        <span class="hljs-keyword">const</span> element = elements[index];
+        <span class="hljs-keyword">let</span> newFiber = <span class="hljs-literal">null</span>;
+​
+        <span class="hljs-keyword">const</span> sameType =
+            oldFiber &amp;&amp;
+            element &amp;&amp;
+            element.<span class="hljs-property">type</span> == oldFiber.<span class="hljs-property">type</span>;
+​
+        <span class="hljs-keyword">if</span> (sameType) {
+        <span class="hljs-comment">// TODO update the node</span>
+        }
+        <span class="hljs-keyword">if</span> (element &amp;&amp; !sameType) {
+        <span class="hljs-comment">// TODO add this node</span>
+        }
+        <span class="hljs-keyword">if</span> (oldFiber &amp;&amp; !sameType) {
+        <span class="hljs-comment">// TODO delete the oldFiber&#x27;s node</span>
+        }
+        <span class="hljs-comment">// ...</span>
+    }
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<blockquote>
+<p>这里 React 还使用了<code>key</code>，这可以更好地协调。例如，它检测子元素何时改变在元素数组中的位置。</p>
+</blockquote>
+<p>当旧的<code>Fiber</code>和元素的类型相同时，我们创建一个新的<code>Fiber</code>，保留旧<code>Fiber</code>的DOM节点和元素的<code>props</code>。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">reconcileChildren</span>(<span class="hljs-params">wipFiber, elements</span>) {
+    <span class="hljs-keyword">let</span> index = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">let</span> oldFiber =
+        wipFiber.<span class="hljs-property">alternate</span> &amp;&amp; wipFiber.<span class="hljs-property">alternate</span>.<span class="hljs-property">child</span>;
+    <span class="hljs-keyword">let</span> prevSibling = <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">while</span> (index &lt; elements.<span class="hljs-property">length</span> ||
+    oldFiber != <span class="hljs-literal">null</span>) {
+        <span class="hljs-keyword">const</span> element = elements[index];
+        <span class="hljs-keyword">let</span> newFiber = <span class="hljs-literal">null</span>;
+        <span class="hljs-keyword">const</span> sameType =
+            oldFiber &amp;&amp;
+            element &amp;&amp;
+            element.<span class="hljs-property">type</span> == oldFiber.<span class="hljs-property">type</span>;
+​
+        <span class="hljs-keyword">if</span> (sameType) {
+            newFiber = {
+                <span class="hljs-attr">type</span>: oldFiber.<span class="hljs-property">type</span>,
+                <span class="hljs-attr">props</span>: element.<span class="hljs-property">props</span>,
+                <span class="hljs-attr">dom</span>: oldFiber.<span class="hljs-property">dom</span>,
+                <span class="hljs-attr">parent</span>: wipFiber,
+                <span class="hljs-attr">alternate</span>: oldFiber,
+                <span class="hljs-attr">effectTag</span>: <span class="hljs-string">&quot;UPDATE&quot;</span>,
+            };
+        }
+        <span class="hljs-comment">// ...</span>
+    }
+}
+</code></pre>
+<p>我们还为<code>fiber</code>添加了一个新属性：<code>effectTag</code>。我们稍后会在提交阶段使用这个属性。</p>
+<p>然后对于元素需要新 DOM 节点的情况，我们使用<code>PLACEMENT</code>的<code>effectTag</code>来标记新<code>fiber</code>。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">reconcileChildren</span>(<span class="hljs-params"><span class="hljs-comment">/* ... */</span></span>) {
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">while</span>(<span class="hljs-comment">/* ... */</span>) {
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-keyword">if</span> (sameType) {<span class="hljs-comment">/* ... */</span>}
+        <span class="hljs-keyword">if</span> (element &amp;&amp; !sameType) {
+            newFiber = {
+                <span class="hljs-attr">type</span>: element.<span class="hljs-property">type</span>,
+                <span class="hljs-attr">props</span>: element.<span class="hljs-property">props</span>,
+                <span class="hljs-attr">dom</span>: <span class="hljs-literal">null</span>,
+                <span class="hljs-attr">parent</span>: wipFiber,
+                <span class="hljs-attr">alternate</span>: <span class="hljs-literal">null</span>,
+                <span class="hljs-attr">effectTag</span>: <span class="hljs-string">&quot;PLACEMENT&quot;</span>,
+            };
+        }
+        <span class="hljs-comment">// ...</span>
+    }
+}
+</code></pre>
+<p>而对于我们需要删除节点的情况，我们没有新的<code>fiber</code>，所以我们将<code>effectTag</code>添加到旧<code>effectTag</code>上。 当我们将<code>fiber</code>树提交到 DOM 时，我们会从’正在进行的工作根’(它没有旧<code>fiber</code>)中进行删除节点的操作。</p>
+<p>所以我们需要一个数组来跟踪我们想要删除的节点。</p>
+<pre class="language-js" data-lang="Javascript"><code>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params"><span class="hljs-comment">/* ... */</span></span>) {
+    <span class="hljs-comment">// ...</span>
+    deletions = [];
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">let</span> deletions = <span class="hljs-literal">null</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">reconcileChildren</span>(<span class="hljs-params"><span class="hljs-comment">/* ... */</span></span>) {
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">while</span>(<span class="hljs-comment">/* ... */</span>) {
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-keyword">if</span> (sameType) {<span class="hljs-comment">/* ... */</span>}
+        <span class="hljs-keyword">if</span> (element &amp;&amp; !sameType) {<span class="hljs-comment">/* ... */</span>}
+        <span class="hljs-keyword">if</span> (oldFiber &amp;&amp; !sameType) {
+            oldFiber.<span class="hljs-property">effectTag</span> = <span class="hljs-string">&quot;DELETION&quot;</span>;
+            deletions.<span class="hljs-title function_">push</span>(oldFiber);
+        }
+        <span class="hljs-comment">// ...</span>
+    }
+}
+</code></pre>
+<p>然后，当我们提交对 DOM 的更改时，我们使用该数组中的<code>fiber</code>进行删除节点的操作。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">commitRoot</span>(<span class="hljs-params"></span>) {
+    deletions.<span class="hljs-title function_">forEach</span>(commitWork);
+    <span class="hljs-title function_">commitWork</span>(wipRoot.<span class="hljs-property">child</span>);
+    currentRoot = wipRoot;
+    wipRoot = <span class="hljs-literal">null</span>;
+}
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<p>现在，让我们更改<code>commitWork</code>函数来处理新的 <code>effectTag</code>。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">commitWork</span>(<span class="hljs-params">fiber</span>) {
+    <span class="hljs-keyword">if</span> (!fiber) {
+        <span class="hljs-keyword">return</span>
+    }
+    <span class="hljs-keyword">const</span> domParent = fiber.<span class="hljs-property">parent</span>.<span class="hljs-property">dom</span>;
+   <span class="hljs-keyword">if</span> (
+        fiber.<span class="hljs-property">effectTag</span> === <span class="hljs-string">&quot;PLACEMENT&quot;</span> &amp;&amp;
+        fiber.<span class="hljs-property">dom</span> != <span class="hljs-literal">null</span>
+    ) {
+        domParent.<span class="hljs-title function_">appendChild</span>(fiber.<span class="hljs-property">dom</span>);
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (
+        fiber.<span class="hljs-property">effectTag</span> === <span class="hljs-string">&quot;UPDATE&quot;</span> &amp;&amp;
+        fiber.<span class="hljs-property">dom</span> != <span class="hljs-literal">null</span>
+    ) {
+    <span class="hljs-title function_">updateDom</span>(
+      fiber.<span class="hljs-property">dom</span>,
+      fiber.<span class="hljs-property">alternate</span>.<span class="hljs-property">props</span>,
+      fiber.<span class="hljs-property">props</span>
+    );
+  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (fiber.<span class="hljs-property">effectTag</span> === <span class="hljs-string">&quot;DELETION&quot;</span>) {
+        domParent.<span class="hljs-title function_">removeChild</span>(fiber.<span class="hljs-property">dom</span>);
+    }
+    <span class="hljs-title function_">commitWork</span>(fiber.<span class="hljs-property">child</span>);
+    <span class="hljs-title function_">commitWork</span>(fiber.<span class="hljs-property">sibling</span>);
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">updateDom</span>(<span class="hljs-params">dom, prevProps, nextProps</span>) {
+  <span class="hljs-comment">// TODO</span>
+}​
+</code></pre>
+<p>如果<code>fiber</code>有<code>PLACEMENT</code>标签，我们和之前一样，将 DOM 节点附加到父<code>fiber</code>的节点上。</p>
+<p>如果是<code>DELETION</code>，我们做相反的事情，删除该节点。</p>
+<p>如果是<code>UPDATE</code>，我们需要用发生改变的<code>props</code>更新现有的 DOM 节点(我们在<code>updateDom</code>函数中处理这块逻辑)。</p>
+<p>我们将旧<code>Fiber</code>的<code>props</code>与新<code>Fiber</code>的<code>props</code>进行比较，移除掉掉的<code>props</code>，设置新的或更改的<code>props</code>。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">const</span> <span class="hljs-title function_">isProperty</span> = key =&gt; key !== <span class="hljs-string">&quot;children&quot;</span>;
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">isNew</span> = (<span class="hljs-params">prev, next</span>) =&gt; <span class="hljs-function"><span class="hljs-params">key</span> =&gt;</span>
+  prev[key] !== next[key];
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">isGone</span> = (<span class="hljs-params">prev, next</span>) =&gt; <span class="hljs-function"><span class="hljs-params">key</span> =&gt;</span> !(key <span class="hljs-keyword">in</span> next);
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">updateDom</span>(<span class="hljs-params">dom, prevProps, nextProps</span>) {
+    <span class="hljs-comment">// 移除旧的不再使用的属性</span>
+    <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(prevProps)
+        .<span class="hljs-title function_">filter</span>(isProperty)
+        .<span class="hljs-title function_">filter</span>(<span class="hljs-title function_">isGone</span>(prevProps, nextProps))
+        .<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">name</span> =&gt;</span> {
+        dom[name] = <span class="hljs-string">&quot;&quot;</span>;
+        });
+    ​
+    <span class="hljs-comment">// 设置新的或改变的属性</span>
+    <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(nextProps)
+        .<span class="hljs-title function_">filter</span>(isProperty)
+        .<span class="hljs-title function_">filter</span>(<span class="hljs-title function_">isNew</span>(prevProps, nextProps))
+        .<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">name</span> =&gt;</span> {
+        dom[name] = nextProps[name];
+        });
+}
+</code></pre>
+<p>我们需要更新的一种特殊类型的属性是事件监听器，因此如果属性键名以&quot;on&quot;前缀开头，我们将以不同的方式处理它们。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">const</span> <span class="hljs-title function_">isEvent</span> = key =&gt; key.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&quot;on&quot;</span>);
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">isProperty</span> = key =&gt;
+  key !== <span class="hljs-string">&quot;children&quot;</span> &amp;&amp; !<span class="hljs-title function_">isEvent</span>(key);
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">isNew</span> = (<span class="hljs-params">prev, next</span>) =&gt; <span class="hljs-function"><span class="hljs-params">key</span> =&gt;</span>
+  prev[key] !== next[key];
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">isGone</span> = (<span class="hljs-params">prev, next</span>) =&gt; <span class="hljs-function"><span class="hljs-params">key</span> =&gt;</span> !(key <span class="hljs-keyword">in</span> next);
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">updateDom</span>(<span class="hljs-params"><span class="hljs-comment">/* ... */</span></span>) {}
+</code></pre>
+<p>如果事件处理程序发生更改，我们将其从节点中删除。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">updateDom</span>(<span class="hljs-params">dom, prevProps, nextProps</span>) {
+    <span class="hljs-comment">// 移除旧的或者发生更新的事件监听器</span>
+    <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(prevProps)
+        .<span class="hljs-title function_">filter</span>(isEvent)
+        .<span class="hljs-title function_">filter</span>(
+        <span class="hljs-function"><span class="hljs-params">key</span> =&gt;</span>
+            !(key <span class="hljs-keyword">in</span> nextProps) ||
+            <span class="hljs-title function_">isNew</span>(prevProps, nextProps)(key)
+        )
+        .<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">name</span> =&gt;</span> {
+        <span class="hljs-keyword">const</span> eventType = name
+            .<span class="hljs-title function_">toLowerCase</span>()
+            .<span class="hljs-title function_">substring</span>(<span class="hljs-number">2</span>);
+        <span class="hljs-comment">// 对于同一事件类型，仍需移除旧的再添加新的</span>
+        dom.<span class="hljs-title function_">removeEventListener</span>(
+            eventType,
+            prevProps[name]
+        );
+    });
+
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>然后我们添加新的事件监听器：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">updateDom</span>(<span class="hljs-params">dom, prevProps, nextProps</span>) {
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-comment">// 添加新的事件监听器</span>
+    <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(nextProps)
+        .<span class="hljs-title function_">filter</span>(isEvent)
+        .<span class="hljs-title function_">filter</span>(<span class="hljs-title function_">isNew</span>(prevProps, nextProps))
+        .<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">name</span> =&gt;</span> {
+        <span class="hljs-keyword">const</span> eventType = name
+            .<span class="hljs-title function_">toLowerCase</span>()
+            .<span class="hljs-title function_">substring</span>(<span class="hljs-number">2</span>);
+        <span class="hljs-comment">// 对于同一事件类型，仍需移除旧的再添加新的</span>
+        dom.<span class="hljs-title function_">addEventListener</span>(
+            eventType,
+            nextProps[name]
+        );
+    });
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<blockquote>
+<p>可以<a href="https://codesandbox.io/s/didact-6-96533">在此</a>尝试新版本的调和功能。</p>
+</blockquote>
+<hr>
+<h4 id="3" tabindex="-1"><a class="header-anchor" href="#3">#</a>柒：函数组件</h4>
+<p>下一件我们要做的事是增加对函数组件的支持。</p>
+<p>首先修改一下示例，我们将使用最简单的函数组件，只返回一个<code>h1</code>元素。</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">const</span> <span class="hljs-title class_">Didact</span> = {
+  createElement,
+  render,
+}
+​
+<span class="hljs-comment">/** <span class="hljs-doctag">@jsx</span> Didact.createElement */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">App</span>(<span class="hljs-params">props</span>) {
+  <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Hi {props.name}<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>
+}
+<span class="hljs-keyword">const</span> element = <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;foo&quot;</span> /&gt;</span></span>;
+<span class="hljs-keyword">const</span> container = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;root&quot;</span>);
+<span class="hljs-title class_">Didact</span>.<span class="hljs-title function_">render</span>(element, container);
+</code></pre>
+<p>请记住当我们将JSX转换为JS时，代码看起来像这样：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">App</span>(<span class="hljs-params">props</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-title class_">Didact</span>.<span class="hljs-title function_">createElement</span>(
+    <span class="hljs-string">&quot;h1&quot;</span>,
+    <span class="hljs-literal">null</span>,
+    <span class="hljs-string">&quot;Hi &quot;</span>,
+    props.<span class="hljs-property">name</span>
+  );
+}
+<span class="hljs-keyword">const</span> element = <span class="hljs-title class_">Didact</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-title class_">App</span>, {
+  <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;foo&quot;</span>,
+});
+
+</code></pre>
+<p>函数组件主要有两个不同点：</p>
+<ul>
+<li>来自函数组件的<code>fiber</code>没有dom节点</li>
+<li>子元素来自函数组件运行的结果，而不是直接从<code>props</code>中获取</li>
+</ul>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-comment">// old code</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">performUnitOfWork</span>(<span class="hljs-params">fiber</span>) {
+    <span class="hljs-keyword">if</span> (!fiber.<span class="hljs-property">dom</span>) {
+        fiber.<span class="hljs-property">dom</span> = <span class="hljs-title function_">createDom</span>(fiber)
+    }
+    ​
+    <span class="hljs-keyword">const</span> elements = fiber.<span class="hljs-property">props</span>.<span class="hljs-property">children</span>
+    <span class="hljs-title function_">reconcileChildren</span>(fiber, elements);
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>所以，我们将会检测<code>fiber</code>的类型是不是一个函数组件，并且基于此判断我们将会使用不同的函数来更新处理：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">performUnitOfWork</span>(<span class="hljs-params">fiber</span>) {
+    <span class="hljs-keyword">const</span> isFunctionComponent =
+        fiber.<span class="hljs-property">type</span> <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Function</span>
+    <span class="hljs-keyword">if</span> (isFunctionComponent) {
+        <span class="hljs-title function_">updateFunctionComponent</span>(fiber)
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-title function_">updateHostComponent</span>(fiber)
+    }
+    <span class="hljs-comment">// ...</span>
+}
+​
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">updateFunctionComponent</span>(<span class="hljs-params">fiber</span>) {
+  <span class="hljs-comment">// TODO</span>
+}
+
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">updateHostComponent</span>(<span class="hljs-params">fiber</span>) {
+  <span class="hljs-keyword">if</span> (!fiber.<span class="hljs-property">dom</span>) {
+    fiber.<span class="hljs-property">dom</span> = <span class="hljs-title function_">createDom</span>(fiber)
+  }
+  <span class="hljs-title function_">reconcileChildren</span>(fiber, fiber.<span class="hljs-property">props</span>.<span class="hljs-property">children</span>);
+}
+</code></pre>
+<p>在<code>updateHostComponent</code>函数中我们做的事情和之前完全一样。</p>
+<p>而在<code>updateFunctionComponent</code>函数中，我们将会运行此函数组件并获取到<code>children</code>：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">updateFunctionComponent</span>(<span class="hljs-params">fiber</span>) {
+    <span class="hljs-keyword">const</span> children = [fiber.<span class="hljs-title function_">type</span>(fiber.<span class="hljs-property">props</span>)];
+    <span class="hljs-title function_">reconcileChildren</span>(fiber, children);
+}
+</code></pre>
+<p>在我们的示例中，这里的<code>fiber.type</code>是<code>App</code>函数，当我们运行它时，它会返回<code>h1</code>元素。 然后，一旦我们有了子元素，调和就会以同样的方式进行，我们不需要在那里修改任何代码。</p>
+<p>我们还需要修改的是<code>commitWork</code>函数。</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">commitWork</span>(<span class="hljs-params">fiber</span>) {
+    <span class="hljs-keyword">if</span> (!fiber) {
+        <span class="hljs-keyword">return</span>;
+    }
+    ​
+    <span class="hljs-keyword">const</span> domParent = fiber.<span class="hljs-property">parent</span>.<span class="hljs-property">dom</span>;
+    <span class="hljs-keyword">if</span> (
+        fiber.<span class="hljs-property">effectTag</span> === <span class="hljs-string">&quot;PLACEMENT&quot;</span> &amp;&amp;
+        fiber.<span class="hljs-property">dom</span> != <span class="hljs-literal">null</span>
+    ) {
+        domParent.<span class="hljs-title function_">appendChild</span>(fiber.<span class="hljs-property">dom</span>);
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (
+        fiber.<span class="hljs-property">effectTag</span> === <span class="hljs-string">&quot;UPDATE&quot;</span> &amp;&amp;
+        fiber.<span class="hljs-property">dom</span> != <span class="hljs-literal">null</span>
+    ) {
+        <span class="hljs-title function_">updateDom</span>(
+        fiber.<span class="hljs-property">dom</span>,
+        fiber.<span class="hljs-property">alternate</span>.<span class="hljs-property">props</span>,
+        fiber.<span class="hljs-property">props</span>
+        );
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (fiber.<span class="hljs-property">effectTag</span> === <span class="hljs-string">&quot;DELETION&quot;</span>) {
+        domParent.<span class="hljs-title function_">removeChild</span>(fiber.<span class="hljs-property">dom</span>);
+    }
+    ​
+    <span class="hljs-title function_">commitWork</span>(fiber.<span class="hljs-property">child</span>);
+    <span class="hljs-title function_">commitWork</span>(fiber.<span class="hljs-property">sibling</span>);
+}
+</code></pre>
+<p>现在我们有了没有 DOM 节点的<code>fiber</code>，我们需要修改两个地方：</p>
+<p>第一步，要找到当前待挂载 DOM 节点的父节点，我们需要循环向上查找直到我们找到一个包含有效dom节点的<code>fiber</code>节点:</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">commitWork</span>(<span class="hljs-params">fiber</span>) {
+    <span class="hljs-keyword">if</span> (!fiber) {
+        <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-keyword">let</span> domParentFiber = fiber.<span class="hljs-property">parent</span>;​
+    <span class="hljs-keyword">while</span> (!domParentFiber.<span class="hljs-property">dom</span>) {
+        domParentFiber = domParentFiber.<span class="hljs-property">parent</span>;
+    }
+    <span class="hljs-keyword">const</span> domParent = domParentFiber.<span class="hljs-property">dom</span>;
+    <span class="hljs-keyword">if</span> (
+        fiber.<span class="hljs-property">effectTag</span> === <span class="hljs-string">&quot;PLACEMENT&quot;</span> &amp;&amp;
+        fiber.<span class="hljs-property">dom</span> != <span class="hljs-literal">null</span>
+    ) {
+        domParent.<span class="hljs-title function_">appendChild</span>(fiber.<span class="hljs-property">dom</span>);
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-comment">/* ... */</span>) {
+        <span class="hljs-comment">// ...</span>
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-comment">/* ... */</span>) {
+        <span class="hljs-comment">// ...</span>
+    }
+    ​<span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>第二步，当移除一个节点时，我们还需要继续移除，直到我们找到一个带有 DOM 节点的子节点：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">commitWork</span>(<span class="hljs-params">fiber</span>) {
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">if</span> (<span class="hljs-comment">/* ... */</span>) {
+        <span class="hljs-comment">// ...</span>
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-comment">/* ... */</span>) {
+        <span class="hljs-comment">// ...</span>
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (fiber.<span class="hljs-property">effectTag</span> === <span class="hljs-string">&quot;DELETION&quot;</span>) {
+        <span class="hljs-title function_">commitDeletion</span>(fiber, domParent);
+    }
+    ​<span class="hljs-comment">// ...</span>
+}
+
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">commitDeletion</span>(<span class="hljs-params">fiber, domParent</span>) {
+    <span class="hljs-keyword">if</span> (fiber.<span class="hljs-property">dom</span>) {
+        domParent.<span class="hljs-title function_">removeChild</span>(fiber.<span class="hljs-property">dom</span>);
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-title function_">commitDeletion</span>(fiber.<span class="hljs-property">child</span>, domParent);
+    }
+}
+</code></pre>
+<hr>
+<h4 id="hooks" tabindex="-1"><a class="header-anchor" href="#hooks">#</a>捌：Hooks</h4>
+<p>我们继续，现在我们有了函数组件，让我们为其添加状态吧。</p>
+<pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">const</span> <span class="hljs-title class_">Didact</span> = {
+  createElement,
+  render,
+  useState,
+}
+​
+<span class="hljs-comment">/** <span class="hljs-doctag">@jsx</span> Didact.createElement */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> [state, setState] = <span class="hljs-title class_">Didact</span>.<span class="hljs-title function_">useState</span>(<span class="hljs-number">1</span>)
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> setState(c =&gt; c + 1)}&gt;
+      Count: {state}
+    <span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>
+  );
+}
+
+<span class="hljs-keyword">const</span> element = <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Counter</span> /&gt;</span></span>;
+<span class="hljs-keyword">const</span> container = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;root&quot;</span>);
+<span class="hljs-title class_">Didact</span>.<span class="hljs-title function_">render</span>(element, container);
+
+</code></pre>
+<p>让我们将示例代码更改为经典的计数器组件。每次我们单击它时，它都会将状态加一。 请注意，我们使用<code>Didact.useState</code>来获取和更新计数器值。</p>
+<p>这里是我们从示例代码中调用<code>Counter</code>函数的地方。在该函数内部，我们调用<code>useState</code>:</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">updateFunctionComponent</span>(<span class="hljs-params">fiber</span>) {
+    <span class="hljs-keyword">const</span> children = [fiber.<span class="hljs-title function_">type</span>(fiber.<span class="hljs-property">props</span>)];
+    <span class="hljs-title function_">reconcileChildren</span>(fiber, children);
+}
+​
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">useState</span>(<span class="hljs-params">initial</span>) {
+  <span class="hljs-comment">// TODO</span>
+}
+</code></pre>
+<p>我们需要在调用函数组件之前初始化一些全局变量，以便我们可以在<code>useState</code>函数中使用它们。</p>
+<p>首先设置’进行中的fiber’：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">let</span> wipFiber = <span class="hljs-literal">null</span>;
+<span class="hljs-keyword">let</span> hookIndex = <span class="hljs-literal">null</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">updateFunctionComponent</span>(<span class="hljs-params">fiber</span>) {
+  wipFiber = fiber;
+  hookIndex = <span class="hljs-number">0</span>;
+  wipFiber.<span class="hljs-property">hooks</span> = [];
+  <span class="hljs-keyword">const</span> children = [fiber.<span class="hljs-title function_">type</span>(fiber.<span class="hljs-property">props</span>)];
+  <span class="hljs-title function_">reconcileChildren</span>(fiber, children);
+}
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">useState</span>(<span class="hljs-params">initial</span>) {
+  <span class="hljs-comment">// TODO</span>
+}
+</code></pre>
+<p>我们还在<code>Fiber</code>中添加了一个<code>hooks</code>数组，以支持在同一个组件中多次调用<code>useState</code>,我们会跟踪当前的钩子索引。</p>
+<p>当函数组件调用<code>useState</code>时，我们使用钩子的索引在<code>fiber.alternate</code>中检查是否有旧的<code>hooks</code>。</p>
+<p>如果我们有一个旧的<code>hooks</code>，我们就把状态从旧的钩子复制到新的钩子上，若没有，则初始化这个状态。</p>
+<p>然后我们将新的<code>hooks</code>添加到<code>fiber</code>中，将钩子的索引增加1，并返回状态:</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">useState</span>(<span class="hljs-params">initial</span>) {
+    <span class="hljs-keyword">const</span> oldHook =
+        wipFiber.<span class="hljs-property">alternate</span> &amp;&amp;
+        wipFiber.<span class="hljs-property">alternate</span>.<span class="hljs-property">hooks</span> &amp;&amp;
+        wipFiber.<span class="hljs-property">alternate</span>.<span class="hljs-property">hooks</span>[hookIndex];
+    <span class="hljs-keyword">const</span> hook = {
+        <span class="hljs-attr">state</span>: oldHook ? oldHook.<span class="hljs-property">state</span> : initial,
+    };
+    ​
+    wipFiber.<span class="hljs-property">hooks</span>.<span class="hljs-title function_">push</span>(hook);
+    hookIndex++;
+    <span class="hljs-keyword">return</span> [hook.<span class="hljs-property">state</span>];
+}
+</code></pre>
+<p><code>useState</code>还应该返回一个函数来更新状态，所以我们定义了一个<code>setState</code>函数来接收一个动作（对于<code>Counter</code>示例，这个动作是一个将状态加一的函数）。</p>
+<p>我们为钩子创建一个队列，并将动作添加至该队列中。</p>
+<p>然后我们做一些类似于我们在渲染函数中所做的事情，将一个新的正在进行的工作根设置为下一个工作单元，这样工作循环就可以开始一个新的渲染阶段：</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">useState</span>(<span class="hljs-params">initial</span>) {
+    <span class="hljs-keyword">const</span> oldHook =
+        wipFiber.<span class="hljs-property">alternate</span> &amp;&amp;
+        wipFiber.<span class="hljs-property">alternate</span>.<span class="hljs-property">hooks</span> &amp;&amp;
+        wipFiber.<span class="hljs-property">alternate</span>.<span class="hljs-property">hooks</span>[hookIndex];
+    <span class="hljs-keyword">const</span> hook = {
+        <span class="hljs-attr">state</span>: oldHook ? oldHook.<span class="hljs-property">state</span> : initial,
+    };
+    ​
+    <span class="hljs-keyword">const</span> <span class="hljs-title function_">setState</span> = action =&gt; {
+        hook.<span class="hljs-property">queue</span>.<span class="hljs-title function_">push</span>(action);
+        wipRoot = {
+            <span class="hljs-attr">dom</span>: currentRoot.<span class="hljs-property">dom</span>,
+            <span class="hljs-attr">props</span>: currentRoot.<span class="hljs-property">props</span>,
+            <span class="hljs-attr">alternate</span>: currentRoot,
+        };
+        nextUnitOfWork = wipRoot;
+        deletions = [];
+    };
+    wipFiber.<span class="hljs-property">hooks</span>.<span class="hljs-title function_">push</span>(hook);
+    hookIndex++;
+    <span class="hljs-keyword">return</span> [hook.<span class="hljs-property">state</span>, setState];
+}
+</code></pre>
+<p>但我们还缺少对动作的执行操作。</p>
+<p>我们在下一次渲染组件时执行动作，我们从旧的钩子队列中获取所有动作，然后将它们一一应用到新的钩子状态，所以当我们返回状态时，它会是更新后的最新值:</p>
+<pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">useState</span>(<span class="hljs-params">initial</span>) {
+    <span class="hljs-keyword">const</span> oldHook =
+        wipFiber.<span class="hljs-property">alternate</span> &amp;&amp;
+        wipFiber.<span class="hljs-property">alternate</span>.<span class="hljs-property">hooks</span> &amp;&amp;
+        wipFiber.<span class="hljs-property">alternate</span>.<span class="hljs-property">hooks</span>[hookIndex];
+    <span class="hljs-keyword">const</span> hook = {
+        <span class="hljs-attr">state</span>: oldHook ? oldHook.<span class="hljs-property">state</span> : initial,
+    };
+    ​
+    <span class="hljs-keyword">const</span> actions = oldHook ? oldHook.<span class="hljs-property">queue</span> : [];
+    actions.<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">action</span> =&gt;</span> {
+        <span class="hljs-comment">// 多次调用可使用最新的值</span>
+        hook.<span class="hljs-property">state</span> = <span class="hljs-title function_">action</span>(hook.<span class="hljs-property">state</span>);
+    });
+
+    <span class="hljs-keyword">const</span> <span class="hljs-title function_">setState</span> = action =&gt; {
+        <span class="hljs-comment">// ...</span>
+    };
+    wipFiber.<span class="hljs-property">hooks</span>.<span class="hljs-title function_">push</span>(hook);
+    hookIndex++;
+    <span class="hljs-keyword">return</span> [hook.<span class="hljs-property">state</span>, setState];
+}
+</code></pre>
+<p>就这样。我们已经构建了自己的<code>React</code>版本。 您可以在<a href="https://codesandbox.io/s/didact-8-21ost">codesandbox</a>或<a href="https://github.com/pomber/didact">github</a>上使用它:</p>
+<pre class="language-js" data-lang="Javascript"><code>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">createElement</span>(<span class="hljs-params">type, props, ...children</span>) {
+  <span class="hljs-keyword">return</span> {
+    type,
+    <span class="hljs-attr">props</span>: {
+      ...props,
+      <span class="hljs-attr">children</span>: children.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">child</span> =&gt;</span>
+        <span class="hljs-keyword">typeof</span> child === <span class="hljs-string">&quot;object&quot;</span>
+          ? child
+          : <span class="hljs-title function_">createTextElement</span>(child)
+      ),
+    },
+  };
+}
+​
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">createTextElement</span>(<span class="hljs-params">text</span>) {
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;TEXT_ELEMENT&quot;</span>,
+    <span class="hljs-attr">props</span>: {
+      <span class="hljs-attr">nodeValue</span>: text,
+      <span class="hljs-attr">children</span>: [],
+    },
+  };
+}
+​
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">createDom</span>(<span class="hljs-params">fiber</span>) {
+  <span class="hljs-keyword">const</span> dom =
+    fiber.<span class="hljs-property">type</span> == <span class="hljs-string">&quot;TEXT_ELEMENT&quot;</span>
+      ? <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createTextNode</span>(<span class="hljs-string">&quot;&quot;</span>)
+      : <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(fiber.<span class="hljs-property">type</span>);
+​
+  <span class="hljs-title function_">updateDom</span>(dom, {}, fiber.<span class="hljs-property">props</span>);
+​
+  <span class="hljs-keyword">return</span> dom;
+}
+​
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">isEvent</span> = key =&gt; key.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&quot;on&quot;</span>);
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">isProperty</span> = key =&gt;
+  key !== <span class="hljs-string">&quot;children&quot;</span> &amp;&amp; !<span class="hljs-title function_">isEvent</span>(key);
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">isNew</span> = (<span class="hljs-params">prev, next</span>) =&gt; <span class="hljs-function"><span class="hljs-params">key</span> =&gt;</span>
+  prev[key] !== next[key];
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">isGone</span> = (<span class="hljs-params">prev, next</span>) =&gt; <span class="hljs-function"><span class="hljs-params">key</span> =&gt;</span> !(key <span class="hljs-keyword">in</span> next);
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">updateDom</span>(<span class="hljs-params">dom, prevProps, nextProps</span>) {
+  <span class="hljs-comment">//Remove old or changed event listeners</span>
+  <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(prevProps)
+    .<span class="hljs-title function_">filter</span>(isEvent)
+    .<span class="hljs-title function_">filter</span>(
+      <span class="hljs-function"><span class="hljs-params">key</span> =&gt;</span>
+        !(key <span class="hljs-keyword">in</span> nextProps) ||
+        <span class="hljs-title function_">isNew</span>(prevProps, nextProps)(key)
+    )
+    .<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">name</span> =&gt;</span> {
+      <span class="hljs-keyword">const</span> eventType = name
+        .<span class="hljs-title function_">toLowerCase</span>()
+        .<span class="hljs-title function_">substring</span>(<span class="hljs-number">2</span>);
+      dom.<span class="hljs-title function_">removeEventListener</span>(
+        eventType,
+        prevProps[name]
+      );
+    });
+​
+  <span class="hljs-comment">// Remove old properties</span>
+  <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(prevProps)
+    .<span class="hljs-title function_">filter</span>(isProperty)
+    .<span class="hljs-title function_">filter</span>(<span class="hljs-title function_">isGone</span>(prevProps, nextProps))
+    .<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">name</span> =&gt;</span> {
+      dom[name] = <span class="hljs-string">&quot;&quot;</span>;
+    });
+​
+  <span class="hljs-comment">// Set new or changed properties</span>
+  <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(nextProps)
+    .<span class="hljs-title function_">filter</span>(isProperty)
+    .<span class="hljs-title function_">filter</span>(<span class="hljs-title function_">isNew</span>(prevProps, nextProps))
+    .<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">name</span> =&gt;</span> {
+      dom[name] = nextProps[name];
+    });
+​
+  <span class="hljs-comment">// Add event listeners</span>
+  <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(nextProps)
+    .<span class="hljs-title function_">filter</span>(isEvent)
+    .<span class="hljs-title function_">filter</span>(<span class="hljs-title function_">isNew</span>(prevProps, nextProps))
+    .<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">name</span> =&gt;</span> {
+      <span class="hljs-keyword">const</span> eventType = name
+        .<span class="hljs-title function_">toLowerCase</span>()
+        .<span class="hljs-title function_">substring</span>(<span class="hljs-number">2</span>);
+      dom.<span class="hljs-title function_">addEventListener</span>(
+        eventType,
+        nextProps[name]
+      );
+    })
+}
+​
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">commitRoot</span>(<span class="hljs-params"></span>) {
+  deletions.<span class="hljs-title function_">forEach</span>(commitWork);
+  <span class="hljs-title function_">commitWork</span>(wipRoot.<span class="hljs-property">child</span>);
+  currentRoot = wipRoot;
+  wipRoot = <span class="hljs-literal">null</span>;
+}
+​
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">commitWork</span>(<span class="hljs-params">fiber</span>) {
+  <span class="hljs-keyword">if</span> (!fiber) {
+    <span class="hljs-keyword">return</span>;
+  }
+​
+  <span class="hljs-keyword">let</span> domParentFiber = fiber.<span class="hljs-property">parent</span>;
+  <span class="hljs-keyword">while</span> (!domParentFiber.<span class="hljs-property">dom</span>) {
+    domParentFiber = domParentFiber.<span class="hljs-property">parent</span>;
+  }
+  <span class="hljs-keyword">const</span> domParent = domParentFiber.<span class="hljs-property">dom</span>;
+​
+  <span class="hljs-keyword">if</span> (
+    fiber.<span class="hljs-property">effectTag</span> === <span class="hljs-string">&quot;PLACEMENT&quot;</span> &amp;&amp;
+    fiber.<span class="hljs-property">dom</span> != <span class="hljs-literal">null</span>
+  ) {
+    domParent.<span class="hljs-title function_">appendChild</span>(fiber.<span class="hljs-property">dom</span>);
+  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (
+    fiber.<span class="hljs-property">effectTag</span> === <span class="hljs-string">&quot;UPDATE&quot;</span> &amp;&amp;
+    fiber.<span class="hljs-property">dom</span> != <span class="hljs-literal">null</span>
+  ) {
+    <span class="hljs-title function_">updateDom</span>(
+      fiber.<span class="hljs-property">dom</span>,
+      fiber.<span class="hljs-property">alternate</span>.<span class="hljs-property">props</span>,
+      fiber.<span class="hljs-property">props</span>
+    );
+  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (fiber.<span class="hljs-property">effectTag</span> === <span class="hljs-string">&quot;DELETION&quot;</span>) {
+    <span class="hljs-title function_">commitDeletion</span>(fiber, domParent);
+  }
+​
+  <span class="hljs-title function_">commitWork</span>(fiber.<span class="hljs-property">child</span>);
+  <span class="hljs-title function_">commitWork</span>(fiber.<span class="hljs-property">sibling</span>);
+}
+​
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">commitDeletion</span>(<span class="hljs-params">fiber, domParent</span>) {
+  <span class="hljs-keyword">if</span> (fiber.<span class="hljs-property">dom</span>) {
+    domParent.<span class="hljs-title function_">removeChild</span>(fiber.<span class="hljs-property">dom</span>);
+  } <span class="hljs-keyword">else</span> {
+    <span class="hljs-title function_">commitDeletion</span>(fiber.<span class="hljs-property">child</span>, domParent);
+  }
+}
+​
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">element, container</span>) {
+  wipRoot = {
+    <span class="hljs-attr">dom</span>: container,
+    <span class="hljs-attr">props</span>: {
+      <span class="hljs-attr">children</span>: [element],
+    },
+    <span class="hljs-attr">alternate</span>: currentRoot,
+  };
+  deletions = [];
+  nextUnitOfWork = wipRoot;
+}
+​
+<span class="hljs-keyword">let</span> nextUnitOfWork = <span class="hljs-literal">null</span>;
+<span class="hljs-keyword">let</span> currentRoot = <span class="hljs-literal">null</span>;
+<span class="hljs-keyword">let</span> wipRoot = <span class="hljs-literal">null</span>;
+<span class="hljs-keyword">let</span> deletions = <span class="hljs-literal">null</span>;
+​
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">workLoop</span>(<span class="hljs-params">deadline</span>) {
+  <span class="hljs-keyword">let</span> shouldYield = <span class="hljs-literal">false</span>;
+  <span class="hljs-keyword">while</span> (nextUnitOfWork &amp;&amp; !shouldYield) {
+    nextUnitOfWork = <span class="hljs-title function_">performUnitOfWork</span>(
+      nextUnitOfWork
+    );
+    shouldYield = deadline.<span class="hljs-title function_">timeRemaining</span>() &lt; <span class="hljs-number">1</span>;
+  }
+​
+  <span class="hljs-keyword">if</span> (!nextUnitOfWork &amp;&amp; wipRoot) {
+    <span class="hljs-title function_">commitRoot</span>();
+  }
+​
+  <span class="hljs-title function_">requestIdleCallback</span>(workLoop);
+}
+​
+<span class="hljs-title function_">requestIdleCallback</span>(workLoop);
+​
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">performUnitOfWork</span>(<span class="hljs-params">fiber</span>) {
+  <span class="hljs-keyword">const</span> isFunctionComponent =
+    fiber.<span class="hljs-property">type</span> <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Function</span>;
+  <span class="hljs-keyword">if</span> (isFunctionComponent) {
+    <span class="hljs-title function_">updateFunctionComponent</span>(fiber);
+  } <span class="hljs-keyword">else</span> {
+    <span class="hljs-title function_">updateHostComponent</span>(fiber);
+  }
+  <span class="hljs-keyword">if</span> (fiber.<span class="hljs-property">child</span>) {
+    <span class="hljs-keyword">return</span> fiber.<span class="hljs-property">child</span>;
+  }
+  <span class="hljs-keyword">let</span> nextFiber = fiber;
+  <span class="hljs-keyword">while</span> (nextFiber) {
+    <span class="hljs-keyword">if</span> (nextFiber.<span class="hljs-property">sibling</span>) {
+      <span class="hljs-keyword">return</span> nextFiber.<span class="hljs-property">sibling</span>;
+    }
+    nextFiber = nextFiber.<span class="hljs-property">parent</span>;
+  }
+}
+​
+<span class="hljs-keyword">let</span> wipFiber = <span class="hljs-literal">null</span>;
+<span class="hljs-keyword">let</span> hookIndex = <span class="hljs-literal">null</span>;
+​
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">updateFunctionComponent</span>(<span class="hljs-params">fiber</span>) {
+  wipFiber = fiber;
+  hookIndex = <span class="hljs-number">0</span>;
+  wipFiber.<span class="hljs-property">hooks</span> = [];
+  <span class="hljs-keyword">const</span> children = [fiber.<span class="hljs-title function_">type</span>(fiber.<span class="hljs-property">props</span>)];
+  <span class="hljs-title function_">reconcileChildren</span>(fiber, children);
+}
+​
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">useState</span>(<span class="hljs-params">initial</span>) {
+  <span class="hljs-keyword">const</span> oldHook =
+    wipFiber.<span class="hljs-property">alternate</span> &amp;&amp;
+    wipFiber.<span class="hljs-property">alternate</span>.<span class="hljs-property">hooks</span> &amp;&amp;
+    wipFiber.<span class="hljs-property">alternate</span>.<span class="hljs-property">hooks</span>[hookIndex];
+  <span class="hljs-keyword">const</span> hook = {
+    <span class="hljs-attr">state</span>: oldHook ? oldHook.<span class="hljs-property">state</span> : initial,
+    <span class="hljs-attr">queue</span>: [],
+  };
+​
+  <span class="hljs-keyword">const</span> actions = oldHook ? oldHook.<span class="hljs-property">queue</span> : [];
+  actions.<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">action</span> =&gt;</span> {
+    hook.<span class="hljs-property">state</span> = <span class="hljs-title function_">action</span>(hook.<span class="hljs-property">state</span>)
+  });
+​
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">setState</span> = action =&gt; {
+    hook.<span class="hljs-property">queue</span>.<span class="hljs-title function_">push</span>(action);
+    wipRoot = {
+      <span class="hljs-attr">dom</span>: currentRoot.<span class="hljs-property">dom</span>,
+      <span class="hljs-attr">props</span>: currentRoot.<span class="hljs-property">props</span>,
+      <span class="hljs-attr">alternate</span>: currentRoot,
+    };
+    nextUnitOfWork = wipRoot;
+    deletions = [];
+  }
+​
+  wipFiber.<span class="hljs-property">hooks</span>.<span class="hljs-title function_">push</span>(hook);
+  hookIndex++;
+  <span class="hljs-keyword">return</span> [hook.<span class="hljs-property">state</span>, setState];
+}
+​
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">updateHostComponent</span>(<span class="hljs-params">fiber</span>) {
+  <span class="hljs-keyword">if</span> (!fiber.<span class="hljs-property">dom</span>) {
+    fiber.<span class="hljs-property">dom</span> = <span class="hljs-title function_">createDom</span>(fiber);
+  }
+  <span class="hljs-title function_">reconcileChildren</span>(fiber, fiber.<span class="hljs-property">props</span>.<span class="hljs-property">children</span>);
+}
+​
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">reconcileChildren</span>(<span class="hljs-params">wipFiber, elements</span>) {
+  <span class="hljs-keyword">let</span> index = <span class="hljs-number">0</span>;
+  <span class="hljs-keyword">let</span> oldFiber =
+    wipFiber.<span class="hljs-property">alternate</span> &amp;&amp; wipFiber.<span class="hljs-property">alternate</span>.<span class="hljs-property">child</span>;
+  <span class="hljs-keyword">let</span> prevSibling = <span class="hljs-literal">null</span>;
+​
+  <span class="hljs-keyword">while</span> (
+    index &lt; elements.<span class="hljs-property">length</span> ||
+    oldFiber != <span class="hljs-literal">null</span>
+  ) {
+    <span class="hljs-keyword">const</span> element = elements[index];
+    <span class="hljs-keyword">let</span> newFiber = <span class="hljs-literal">null</span>;
+​
+    <span class="hljs-keyword">const</span> sameType =
+      oldFiber &amp;&amp;
+      element &amp;&amp;
+      element.<span class="hljs-property">type</span> == oldFiber.<span class="hljs-property">type</span>;
+​
+    <span class="hljs-keyword">if</span> (sameType) {
+      newFiber = {
+        <span class="hljs-attr">type</span>: oldFiber.<span class="hljs-property">type</span>,
+        <span class="hljs-attr">props</span>: element.<span class="hljs-property">props</span>,
+        <span class="hljs-attr">dom</span>: oldFiber.<span class="hljs-property">dom</span>,
+        <span class="hljs-attr">parent</span>: wipFiber,
+        <span class="hljs-attr">alternate</span>: oldFiber,
+        <span class="hljs-attr">effectTag</span>: <span class="hljs-string">&quot;UPDATE&quot;</span>,
+      };
+    }
+    <span class="hljs-keyword">if</span> (element &amp;&amp; !sameType) {
+      newFiber = {
+        <span class="hljs-attr">type</span>: element.<span class="hljs-property">type</span>,
+        <span class="hljs-attr">props</span>: element.<span class="hljs-property">props</span>,
+        <span class="hljs-attr">dom</span>: <span class="hljs-literal">null</span>,
+        <span class="hljs-attr">parent</span>: wipFiber,
+        <span class="hljs-attr">alternate</span>: <span class="hljs-literal">null</span>,
+        <span class="hljs-attr">effectTag</span>: <span class="hljs-string">&quot;PLACEMENT&quot;</span>,
+      };
+    }
+    <span class="hljs-keyword">if</span> (oldFiber &amp;&amp; !sameType) {
+      oldFiber.<span class="hljs-property">effectTag</span> = <span class="hljs-string">&quot;DELETION&quot;</span>;
+      deletions.<span class="hljs-title function_">push</span>(oldFiber);
+    }
+​
+    <span class="hljs-keyword">if</span> (oldFiber) {
+      oldFiber = oldFiber.<span class="hljs-property">sibling</span>;
+    }
+​
+    <span class="hljs-keyword">if</span> (index === <span class="hljs-number">0</span>) {
+      wipFiber.<span class="hljs-property">child</span> = newFiber;
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (element) {
+      prevSibling.<span class="hljs-property">sibling</span> = newFiber;
+    }
+​
+    prevSibling = newFiber;
+    index++;
+  }
+}
+​
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Didact</span> = {
+  createElement,
+  render,
+  useState,
+};
+​
+<span class="hljs-comment">/** <span class="hljs-doctag">@jsx</span> Didact.createElement */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> [state, setState] = <span class="hljs-title class_">Didact</span>.<span class="hljs-title function_">useState</span>(<span class="hljs-number">1</span>)
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> setState(c =&gt; c + 1)}&gt;
+      Count: {state}
+    <span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>
+  );
+}
+<span class="hljs-keyword">const</span> element = <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Counter</span> /&gt;</span></span>;
+<span class="hljs-keyword">const</span> container = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;root&quot;</span>);
+<span class="hljs-title class_">Didact</span>.<span class="hljs-title function_">render</span>(element, container);
+</code></pre>
+<hr>
+<h4 id="4" tabindex="-1"><a class="header-anchor" href="#4">#</a>结语</h4>
+<p>除了帮助您了解 React 的工作原理之外，这篇文章的目标之一是让您更轻松地深入研究 React 代码库。这就是为什么我们几乎在所有地方都使用相同的变量和函数名称。</p>
+<p>例如，如果你在一个真正的 React 应用程序中的一个函数组件中添加一个断点，调用堆栈应该会显示：</p>
+<ul>
+<li>workLoop</li>
+<li>performUnitOfWork</li>
+<li>updateFunctionComponent</li>
+</ul>
+<p>我们没有包含很多 React 特性和优化。例如，以下是 React 做的一些不同的事情:</p>
+<ul>
+<li>在<code>Didact</code>中，我们在渲染阶段遍历整个树。相反，<code>React</code>遵循一些提示和启发式方法来跳过没有任何变化的整个子树。</li>
+<li>我们还在提交阶段遍历整个树。 React 保留了一个链表，其中仅包含具有<code>effectTag</code>的<code>fiber</code>，并且仅访问这些<code>fibers</code>。</li>
+<li>每次我们构建一个新的工作树时，我们都会为每个<code>fiber</code>创建新对象。 React 从旧的树中回收<code>fiber</code>。</li>
+<li>当<code>Didact</code>在渲染阶段收到新的更新时，它会丢弃正在进行的工作树并从根重新开始; React 使用过期时间戳标记每个更新，并使用它来决定哪个更新具有更高的优先级。</li>
+<li>还有更多不同…</li>
+</ul>
+<p>你还可以轻松添加一些功能：</p>
+<ul>
+<li>使用一个对象来表示<code>style</code>属性</li>
+<li><a href="https://github.com/pomber/didact/issues/11">子元素扁平化</a></li>
+<li><code>useEffect</code>钩子</li>
+<li>通过<code>key</code>进行调和</li>
+</ul>
+<p>如果你向<code>Didact</code>添加任何这些或其他功能，请到github仓库发起PR，以便其他人可以看到它。</p>
+<p>感谢阅读！</p>
+<h5 id="5" tabindex="-1"><a class="header-anchor" href="#5">#</a>参考链接</h5>
+<ul>
+<li><a href="https://pomb.us/build-your-own-react/">build-your-own-react</a></li>
+</ul>
+</article></section></main><section class="app-post-footer"><div class="pure-g app-post-footer--box"><div class="pure-u-1 post-footer-updated"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>Updated at 28/08/2022 15:19</span></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#tag" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-tags"><li><a href="/adios-blogs/tags/react/1.html" title="React">React</a></li></ul></div></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#folder" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-categories"><li><a href="/adios-blogs/categories/前端/1.html" title="前端">前端</a></li></ul></div></div></div></section><style>.scroll-btn {
+    position: fixed;
+    display: none;
+    right: 3em;
+    bottom: 4.5em;
+    width: 28px;
+    height: 28px;
+    opacity: .5;
+    cursor: pointer;
+    z-index: 1;
+}
+.scroll-btn:hover {
+    opacity: 1;
+}
+</style><span class="scroll-btn"><svg class="icon icon" aria-hidden="true" style="width:28px;height:28px;"><use xlink:href="#arrow-up" x="0" y="0" width="28" height="28"></use></svg></span><script>function getBtn() {
+    var btns = document.getElementsByClassName('scroll-btn');
+    if (btns && btns.length) return btns[0];
+    return null;
+}
+function scrollTop(btn) {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+    btn.style.display = 'none';
+}
+
+function debouce(callback, ms) {
+    var t = null;
+    return function () {
+        var args = Array.prototype.slice.call(arguments);
+        var ctx = this;
+        if (t) {
+            clearTimeout(t);
+        }
+        t = setTimeout(function () {
+                clearTimeout(t);
+                t = null;
+                callback.apply(ctx, args);
+            }, ms);
+    }
+}
+
+//- place here for dom ready
+~(function () {
+    function setStyle() {
+        var btn = getBtn();
+        var sH = window.scrollY;
+        if (btn) {
+            btn.style.display = sH > 100 ? 'inline' : 'none';
+        }
+        return btn;
+    }
+
+    var btn = setStyle();
+    if (btn) {
+        btn.addEventListener('click', function () {
+            scrollTop(this);
+        });
+        window.onscroll = debouce(setStyle, 500);
+    }
+    btns = null;
+})();</script><footer class="pure-g app-footer"><div class="pure-u-1"><div class="pure-g"><div class="pure-u-1"><abbr class="share-license" title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.">CC BY-NC 4.0</abbr><span class="copyright">&copy; wiskewu. 2022</span></div><div class="pure-u-1 last-update">站点最后更新于: 8/28/2022</div></div></div></footer></div></div></body><script src="/adios-blogs/statics/js/main.js"></script></html>

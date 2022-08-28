@@ -84,7 +84,7 @@ s.<span class="hljs-title function_">codePointAt</span>(<span class="hljs-number
 <span class="hljs-title class_">String</span>.<span class="hljs-title function_">fromCodePoint</span>(<span class="hljs-number">0x78</span>, <span class="hljs-number">0x1f680</span>, <span class="hljs-number">0x79</span>) === <span class="hljs-string">&#x27;x\uD83D\uDE80y&#x27;</span>; <span class="hljs-comment">// true</span>
 </code></pre>
 <p>可知，<code>String.fromCodePoint</code>方法支持多个参数，它们会被合并为一个字符串返回。</p>
-<h4 id="1661671271010-001" tabindex="-1"><a class="header-anchor" href="#1661671271010-001">#</a>字符串的遍历器接口</h4>
+<h4 id="1661703830123-001" tabindex="-1"><a class="header-anchor" href="#1661703830123-001">#</a>字符串的遍历器接口</h4>
 <p>前面提到，<code>for...of</code>可以正确识别32位的UTF-16字符，而普通的<code>for (;;)</code>循环则无法正确识别大于<code>0xFFFFF</code>码点地字符。</p>
 <h4 id="at()" tabindex="-1"><a class="header-anchor" href="#at()">#</a>at()</h4>
 <p>ES5对字符串提供了<code>charAt</code>方法，返回字符串给定位置的字符，但该方法无法正确识别码点大于<code>0xFFFF</code>的字符。</p>

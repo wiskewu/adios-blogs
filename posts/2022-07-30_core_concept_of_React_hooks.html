@@ -109,7 +109,7 @@
 <span class="hljs-comment">// render: { count: 2 }</span>
 
 </code></pre>
-<h4 id="1664591217135-001" tabindex="-1"><a class="header-anchor" href="#1664591217135-001">#</a>进阶</h4>
+<h4 id="1664615571918-001" tabindex="-1"><a class="header-anchor" href="#1664615571918-001">#</a>进阶</h4>
 <p>虽然上述代码中我们看似实现了<code>useState</code>、<code>useEffect</code>核心逻辑，但是它们都是只能在单例模式下运行，多个<code>useState</code>或<code>useEffect</code>将会导致逻辑混乱。<br>
 下面我们将实现一个较为完整的hooks版本，核心的要点就是使用<strong>数组+迭代+闭包</strong>：</p>
 <pre class="language-javascript" data-lang="Javascript"><code><span class="hljs-keyword">const</span> <span class="hljs-title class_">MyReact</span> = (<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {

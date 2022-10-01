@@ -2,7 +2,7 @@
 title: Command Line Api Reference
 layout: post
 createDate: 2022-09-04 16:39
-updateDate: 2022-09-13 23:31
+updateDate: 2022-10-01 09:42
 author: wiskewu
 categories: Devtool
 tags: api
@@ -14,6 +14,43 @@ top: false
 #### 简介
 
 `Command Line API`是`Google Chrome`浏览器为开发者提供的执行常见任务的工具函数集合。包含了一些快捷函数用于快速选择和审查DOM元素、启动和停止分析器、监听DOM事件等。
+
+#### 快速开始
+
+`Command Line API`仅能在`Chrome DevTools Console`中使用。如果尝试在脚本中调用它们，它们将无法工作。
+
+可以使用下述方式快速了解当前Chrome提供了哪些Command Line API：
+
+1. 创建以下html文件：
+
+    ```html
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script>
+            var keyList = Reflect.ownKeys(window);
+        </script>
+    </body>
+    </html>
+    ```
+
+2. 使用chrome打开上述html，并打开调试控制台，输入以下内容：
+
+    ```js
+    var keyList2 = Reflect.ownKeys(window);
+    keyList2.filter(key=>!keyList.includes(key));
+    ```
+
+3. 回车即可得到当前chrome提供的所有内置Command Line API
+
+(上述原理实际上就是因为在调试控制台可以获取到挂载在window下特有的属性，而在普通脚本里是获取不到的)
+
+接下来，让我们逐个了解这些API吧。
 
 #### \$_
 

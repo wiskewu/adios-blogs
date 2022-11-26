@@ -1,9 +1,9 @@
-<html lang="zh"><head><title>Adiós Blog - React深入-useEffect完全指南</title><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="Adiós的个人博客网站"/><meta name="author"/><meta name="kewords" content="Adiós's independent blog"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss-min@2.1.0.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-base-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-grids-responsive-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/theme.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/layout.css"/><link rel="apple-touch-icon" sizes="180x180" href="/adios-blogs/statics/icons/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/adios-blogs/statics/icons/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/adios-blogs/statics/icons/favicon-16x16.png"/><link rel="manifest" href="/adios-blogs/statics/icons/site.webmanifest"/><link id="hl-github" rel="stylesheet" href="/adios-blogs/statics/css/highlight.js/github.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/markdown.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/post.css"/></head><body class="theme-light"><div id="app"><div id="app-container"><header class="app-post-header pure-g"><div class="pure-u-1"><div class="pure-g app-post-header--box"><h1 class="pure-u-1 post-header-title">React深入-useEffect完全指南</h1><div class="pure-u-1 post-header-info"><p class="post-header-info--created"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>24/07/2022 13:51</span></p><span class="post-header-info--divider">·</span><p class="post-header-info--author"><svg class="icon icon" aria-hidden="true"><use xlink:href="#pencil-alt" x="0" y="0" width="16" height="16"></use></svg><span>wiskewu</span></p></div></div></div></header><div class="pure-g app-post-navigation"><span click="toggleTheme()"><a href="/adios-blogs/"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#home" x="0" y="0" width="24" height="24"></use></svg></a></span><span class="theme-btn" onclick="toggleTheme(this)"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#sun" x="0" y="0" width="24" height="24"></use></svg></span></div><hr/><main class="app-body"><section class="app-post-body"><article class="markdown app-post-body-content"><blockquote>
+<html lang="zh"><head><title>Adiós Blog - React深入-useEffect完全指南</title><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="Adiós的个人博客网站"/><meta name="author"/><meta name="kewords" content="Adiós's independent blog"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss-min@2.1.0.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-base-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-grids-responsive-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/theme.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/layout.css"/><link rel="apple-touch-icon" sizes="180x180" href="/adios-blogs/statics/icons/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/adios-blogs/statics/icons/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/adios-blogs/statics/icons/favicon-16x16.png"/><link rel="manifest" href="/adios-blogs/statics/icons/site.webmanifest"/><link id="hl-github" rel="stylesheet" href="/adios-blogs/statics/css/highlight.js/github.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/markdown.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/katex/katex.min@0.5.1.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/post.css"/></head><body class="theme-light"><div id="app"><div id="app-container"><header class="app-post-header pure-g"><div class="pure-u-1"><div class="pure-g app-post-header--box"><h1 class="pure-u-1 post-header-title">React深入-useEffect完全指南</h1><div class="pure-u-1 post-header-info"><p class="post-header-info--created"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>24/07/2022 13:51</span></p><span class="post-header-info--divider">·</span><p class="post-header-info--author"><svg class="icon icon" aria-hidden="true"><use xlink:href="#pencil-alt" x="0" y="0" width="16" height="16"></use></svg><span>wiskewu</span></p></div></div></div></header><div class="pure-g app-post-navigation"><span click="toggleTheme()"><a href="/adios-blogs/"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#home" x="0" y="0" width="24" height="24"></use></svg></a></span><span class="theme-btn" onclick="toggleTheme(this)"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#sun" x="0" y="0" width="24" height="24"></use></svg></span></div><hr/><main class="app-body"><section class="app-post-body"><article class="markdown app-post-body-content"><blockquote>
 <p>通篇大部分内容来自<a href="https://overreacted.io/a-complete-guide-to-useeffect/">a-complete-guide-to-useeffect</a>;<br>
 部分内容根据作者自身理解略有修改和补充。</p>
 </blockquote>
 <hr>
-<h3 id="1669440943385-001" tabindex="-1"><a class="header-anchor" href="#1669440943385-001">#</a>背景</h3>
+<h3 id="背景" tabindex="-1"><a class="header-anchor" href="#背景">¶</a>背景</h3>
 <p>我们在使用<code>useEffect</code>时总会感觉一知半解，甚至无法理解部分行为与预期的不一致。心中常常迸发以下几个问题：</p>
 <ul>
 <li>如何使用<code>useEffect</code>模拟<code>componentDidMount</code>生命周期？</li>
@@ -15,7 +15,7 @@
 <p>当你开始阅读以下接下来的内容时，你可能需要明白：“当你不再透过熟悉的class组件生命周期方法去窥视<code>useEffect</code>这个<code>Hook</code>时，你才能得以融会贯通。”</p>
 <p>让我们带着心中的疑问进入正文吧。</p>
 <hr>
-<h3 id="1" tabindex="-1"><a class="header-anchor" href="#1">#</a>摘要</h3>
+<h3 id="摘要" tabindex="-1"><a class="header-anchor" href="#摘要">¶</a>摘要</h3>
 <p>如果你不想阅读整篇内容，可以快速浏览这份摘要。要是部分内容不理解，你可以向下翻阅查找更多详细内容。</p>
 <ol>
 <li>Question: 如何用<code>useEffect</code>模拟<code>componentDidMount</code>生命周期？</li>
@@ -38,7 +38,7 @@
 </ol>
 <p><em>effect拿到的总是定义它的那一次渲染中的props或state</em>。如果你觉得在渲染中拿到了一些旧的props或state，且不是你想要的，那么你很可能遗漏了一些依赖。</p>
 <hr>
-<h3 id="propsstate" tabindex="-1"><a class="header-anchor" href="#propsstate">#</a>每一次渲染都有它自己的Props和State</h3>
+<h3 id="每一次渲染都有它自己的props和state" tabindex="-1"><a class="header-anchor" href="#每一次渲染都有它自己的props和state">¶</a>每一次渲染都有它自己的Props和State</h3>
 <p>在我们讨论effects之前，我们需要先讨论一下渲染(rendering)。<br>
 我们来看一个Counter组件：</p>
 <pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
@@ -95,7 +95,7 @@
 </code></pre>
 <p>它仅仅只是在渲染输出中插入了<code>count</code>这个数字，这个数字由React提供。当<code>setCount</code>的时候，React会带着一个不同的<code>count</code>值再次调用组件。然后，React会更新DOM以保持和渲染输出一致。</p>
 <p>这里关键的点在于任意一次渲染中的<code>count</code>常量都不会随着时间改变。渲染输出会变是因为我们的组件被一次次调用，而每一次调用引起的渲染中，它包含的<code>count</code>值独立于其他渲染。</p>
-<h3 id="2" tabindex="-1"><a class="header-anchor" href="#2">#</a>每一次渲染都有它自己的事件处理函数</h3>
+<h3 id="每一次渲染都有它自己的事件处理函数" tabindex="-1"><a class="header-anchor" href="#每一次渲染都有它自己的事件处理函数">¶</a>每一次渲染都有它自己的事件处理函数</h3>
 <p>看下面这个例子：</p>
 <pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
     <span class="hljs-keyword">const</span> [count, setCount] = <span class="hljs-title function_">useState</span>(<span class="hljs-number">0</span>);
@@ -223,7 +223,7 @@ someone = { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot
 </code></pre>
 <p>也就是说事件处理函数&quot;属于&quot;某一次特定的渲染，当你点击的时候，它会使用那次渲染中<code>counter</code>的状态值。</p>
 <p>在任意一次渲染中，props和state是始终不变的。如果props和state在不同的渲染中是相互独立的，那么使用到它们的任何值也是独立的（包括事件处理函数）。它们都&quot;属于&quot;一次特定的渲染。即便是事件处理中的异步函数调用&quot;看到&quot;的也是这次渲染中的<code>count</code>值。</p>
-<h3 id="effects" tabindex="-1"><a class="header-anchor" href="#effects">#</a>每次渲染都有它自己的Effects</h3>
+<h3 id="每次渲染都有它自己的effects" tabindex="-1"><a class="header-anchor" href="#每次渲染都有它自己的effects">¶</a>每次渲染都有它自己的Effects</h3>
 <p>通过上述的计数器例子，我们已经知道<code>count</code>是属于某个特定渲染中的常量。事件处理函数&quot;看到&quot;的是属于它那次特定渲染中的<code>count</code>值，对于effects也同样如此。</p>
 <p>并不是<code>count</code>的值在&quot;不变&quot;的effect中发生了改变，而是effect本身在每一次渲染中都不相同。<br>
 每一个effect版本&quot;看到&quot;的<code>count</code>值都来自于它属于的那一次渲染：</p>
@@ -298,7 +298,7 @@ someone = { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot
 </li>
 </ol>
 <hr>
-<h3 id="..." tabindex="-1"><a class="header-anchor" href="#...">#</a>每一次渲染都有它自己的…所有</h3>
+<h3 id="每一次渲染都有它自己的...所有" tabindex="-1"><a class="header-anchor" href="#每一次渲染都有它自己的...所有">¶</a>每一次渲染都有它自己的…所有</h3>
 <p>我们现在知道effects会在每次渲染之后运行，并且概念上它是组件输出的一部分，可以&quot;看到&quot;属于某次特定渲染的props和state。</p>
 <p>思考以下代码：</p>
 <pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
@@ -404,7 +404,7 @@ You clicked 5 times
   }
 }
 </code></pre>
-<h3 id="3" tabindex="-1"><a class="header-anchor" href="#3">#</a>逆潮而动</h3>
+<h3 id="逆潮而动" tabindex="-1"><a class="header-anchor" href="#逆潮而动">¶</a>逆潮而动</h3>
 <p>到目前为止，我们可以明确地喊出下面重要的事实：<strong>每一个组件内的函数（包括事件处理函数，effects，定时器或者API调用等等）会捕获某次渲染中定义的props和state</strong>。</p>
 <p>所以下面的两个例子是相等的：</p>
 <pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Example</span>(<span class="hljs-params">props</span>) {
@@ -460,7 +460,7 @@ You clicked 5 times
 You clicked 5 times
 ...
 </code></pre>
-<h3 id="effect" tabindex="-1"><a class="header-anchor" href="#effect">#</a>Effect中的清理</h3>
+<h3 id="effect中的清理" tabindex="-1"><a class="header-anchor" href="#effect中的清理">¶</a>Effect中的清理</h3>
 <p>像<a href="https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup">React官网</a>介绍的，有些effects可能需要一个清理步骤。本质上，它的目的是消除副作用（effect），比如取消订阅。</p>
 <p>思考以下代码：</p>
 <pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-comment">// ...</span>
@@ -515,7 +515,7 @@ You clicked 5 times
 }
 </code></pre>
 <p>这正是为什么React能做到在绘制之后立即处理effects–并且默认情况下使你的应用运行更流畅。因为你的代码依然可以访问到旧的props，因此清除effect的过程可以发生在UI渲染之后。</p>
-<h3 id="4" tabindex="-1"><a class="header-anchor" href="#4">#</a>同步，而非生命周期</h3>
+<h3 id="同步而非生命周期" tabindex="-1"><a class="header-anchor" href="#同步而非生命周期">¶</a>同步，而非生命周期</h3>
 <p>假设有这么个组件：</p>
 <pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Greeting</span>(<span class="hljs-params">{ name }</span>) {
     <span class="hljs-keyword">return</span> (
@@ -541,7 +541,7 @@ React会根据我们当前的props和state同步到DOM。&quot;mount&quot;和&qu
 <p>这就是和大家熟知的mount/update/unmount心智模型之间细微的区别。理解和内化这种区别是非常重要的。如果你试图写一个effect会根据是否第一次渲染而表现不一致，那么你正在逆潮而动。如果我们的结果依赖于过程而不是目的，我们就会在同步中犯错。</p>
 <p>先渲染属性A、B，再渲染C，和立即渲染C并没有什么区别。虽然它们可能短暂地会有点不同（比如请求数据时），但最终的结果是一样的。</p>
 <p>不过话说回来，在每一次渲染后都去运行所有的effects可能并不高效。（并且在某些场景下，它可能会导致无限循环）</p>
-<h3 id="reacteffects" tabindex="-1"><a class="header-anchor" href="#reacteffects">#</a>告诉React去对比你的effects</h3>
+<h3 id="告诉react去对比你的effects" tabindex="-1"><a class="header-anchor" href="#告诉react去对比你的effects">¶</a>告诉React去对比你的effects</h3>
 <p>其实我们已经从React处理DOM的方式中学习到了解决办法。React只会更新DOM真正发生改变的部分，而不是每次渲染都大动干戈。<br>
 当你把：</p>
 <pre class="language-jsx" data-lang="Javascript"><code>&lt;h1 className=<span class="hljs-string">&quot;Greeting&quot;</span>&gt;
@@ -605,7 +605,7 @@ React会根据我们当前的props和state同步到DOM。&quot;mount&quot;和&qu
 <span class="hljs-comment">// 因为依赖性没有改变，所以React无需再次执行这个effect</span>
 </code></pre>
 <p>即使依赖数组中只有一个值在两次渲染中不一样，我们也不能跳过effect的运行。要同步所有！</p>
-<h3 id="react" tabindex="-1"><a class="header-anchor" href="#react">#</a>别对React欺骗所需的依赖项</h3>
+<h3 id="别对react欺骗所需的依赖项" tabindex="-1"><a class="header-anchor" href="#别对react欺骗所需的依赖项">¶</a>别对React欺骗所需的依赖项</h3>
 <p>在依赖项上，对React欺骗会导致不好的结果。这很好理解，但是在编写代码时却又常常违反这个范式：</p>
 <pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">SearchResults</span>(<span class="hljs-params"></span>) {
   <span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">fetchData</span>(<span class="hljs-params"></span>) {
@@ -621,7 +621,7 @@ React会根据我们当前的props和state同步到DOM。&quot;mount&quot;和&qu
 </code></pre>
 <p>上述代码中你可能只是想在组件挂载时运行某个effect。但是你必须记住：“一旦你设置了依赖项，那么effect中用到的所有组件内的值都要包含在依赖中。这包括props、state、函数—组件内的任何东西”。</p>
 <p>有时候你按照上述说的做了，但可能会引起一个问题。比如，你可能会遇到无限请求的问题，或者socket被频繁创建的问题。解决问题的方法不是移除依赖项，我们在接下来的内容会了解到具体的解决方案。</p>
-<h3 id="5" tabindex="-1"><a class="header-anchor" href="#5">#</a>如果设置了错误的依赖会怎么样？</h3>
+<h3 id="如果设置了错误的依赖会怎么样" tabindex="-1"><a class="header-anchor" href="#如果设置了错误的依赖会怎么样">¶</a>如果设置了错误的依赖会怎么样？</h3>
 <p>如果依赖项包含了所有effect中使用到的值，React就能知道何时需要运行它：</p>
 <pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
     <span class="hljs-variable language_">document</span>.<span class="hljs-property">title</span> = <span class="hljs-string">&#x27;Hello, &#x27;</span> + name;
@@ -696,7 +696,7 @@ React会根据我们当前的props和state同步到DOM。&quot;mount&quot;和&qu
 }, []);
 <span class="hljs-comment">// ...</span>
 </code></pre>
-<h3 id="6" tabindex="-1"><a class="header-anchor" href="#6">#</a>两种诚实告知依赖的方法</h3>
+<h3 id="两种诚实告知依赖的方法" tabindex="-1"><a class="header-anchor" href="#两种诚实告知依赖的方法">¶</a>两种诚实告知依赖的方法</h3>
 <p>有两种诚实告知React所需依赖的策略。你应该从第一种开始，然后在需要的时候应用第二种。</p>
 <p>第一种策略是在依赖中包含所有effect中用到的组件内的值。让我们在依赖中包含<code>count</code>:</p>
 <pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
@@ -710,7 +710,7 @@ React会根据我们当前的props和state同步到DOM。&quot;mount&quot;和&qu
 这能解决问题但是我们的定时器会在每一次count改变后清除和重新设定。这应该不是我们想要的结果。</p>
 <p>第二种策略是修改effect内部的代码以确保它包含的值只会在需要的时候发生变更。我们不想告知错误的依赖 - 我们只是修改effect使得依赖更少。</p>
 <hr>
-<h3 id="effects-1" tabindex="-1"><a class="header-anchor" href="#effects-1">#</a>让Effects自给自足</h3>
+<h3 id="让effects自给自足" tabindex="-1"><a class="header-anchor" href="#让effects自给自足">¶</a>让Effects自给自足</h3>
 <p>我们想去掉effect的<code>count</code>依赖，为了实现这个目的，我们需要问自己一个问题：我们为什么要用<code>count</code>？可以看到我们只在<code>setCount</code>调用中用到了<code>count</code>。在这个场景中，我们其实并不需要在effect中使用<code>count</code>。当我们想要根据前一个状态更新状态的时候，我们可以使用<code>setState</code>的函数形式：</p>
 <pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
     <span class="hljs-keyword">const</span> id = <span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> {
@@ -721,7 +721,7 @@ React会根据我们当前的props和state同步到DOM。&quot;mount&quot;和&qu
 </code></pre>
 <p>我们需要告知React的仅仅是去递增状态 - 不管它现在具体是什么值(实际上React已经知道当前的<code>count</code>值)。这正是<code>setCount(c =&gt; c + 1)</code>做的事情。你可以认为它是在给React&quot;发送指令&quot;告知如何更新状态。这种&quot;更新形式&quot;在其他情况下也有帮助，比如你需要批量更新。</p>
 <p>尽管effect只运行了一次，第一次渲染中的定时器回调函数可以完美地在每次触发的时候给React发送<code>c =&gt; c + 1</code>更新指令。它不再需要知道当前的<code>count</code>值, 因为React已经知道了。</p>
-<h3 id="actions" tabindex="-1"><a class="header-anchor" href="#actions">#</a>解耦来自Actions的更新</h3>
+<h3 id="解耦来自actions的更新" tabindex="-1"><a class="header-anchor" href="#解耦来自actions的更新">¶</a>解耦来自Actions的更新</h3>
 <p>即使是<code>setCount(c =&gt; c + 1)</code>也并不完美。它看起来有点怪，并且非常受限于它能做的事。举个例子，如果我们有两个互相依赖的状态，或者我们想基于一个prop来计算下一次的state，它并不能做到。幸运的是， <code>setCount(c =&gt; c + 1)</code>有一个更强大的姐妹模式，它的名字叫<code>useReducer</code>。</p>
 <p>我们来修改上面的例子让它包含两个状态：<code>count</code> 和 <code>step</code>。我们的定时器会每次在<code>count</code>上增加一个<code>step</code>值：</p>
 <pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
@@ -789,7 +789,7 @@ React会根据我们当前的props和state同步到DOM。&quot;mount&quot;和&qu
 }
 </code></pre>
 <p>你可能会问：&quot;这怎么就更好了？&quot;答案是<strong>React会保证<code>dispatch</code>在组件的声明周期内保持不变</strong>。所以上面例子中不再需要重新订阅定时器。（你可以从依赖中去除dispatch, setState, 和useRef包裹的值因为React会确保它们是静态的。不过你设置了它们作为依赖也没什么问题。）</p>
-<h3 id="usereducerhooks" tabindex="-1"><a class="header-anchor" href="#usereducerhooks">#</a>为什么useReducer是Hooks的作弊模式</h3>
+<h3 id="为什么usereducer是hooks的作弊模式" tabindex="-1"><a class="header-anchor" href="#为什么usereducer是hooks的作弊模式">¶</a>为什么useReducer是Hooks的作弊模式</h3>
 <p>我们已经学习到如何移除effect的依赖，不管状态更新是依赖上一个状态还是依赖另一个状态。但假如我们需要依赖props去计算下一个状态呢？举个例子，也许我们的API是<code>&lt;Counter step={1} /&gt;</code>。确定的是，在这种情况下，我们没法避免依赖<code>props.step</code> 。是吗？</p>
 <p>实际上， 我们可以避免！我们可以把reducer函数放到组件内去读取props：</p>
 <pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params">{ step }</span>) {
@@ -817,7 +817,7 @@ React会根据我们当前的props和state同步到DOM。&quot;mount&quot;和&qu
 <p>即使是在这个例子中，React也保证dispatch在每次渲染中都是一样的。 所以你可以在依赖中去掉它。它不会引起effect不必要的重复执行。</p>
 <p>你可能会疑惑：这怎么可能？在之前渲染中调用的reducer怎么&quot;知道&quot;新的props？答案是当你<code>dispatch</code>的时候，React只是记住了action - 它会在下一次渲染中再次调用reducer。在那个时候，新的props就可以被访问到，而且reducer调用也不是在effect里。</p>
 <p>这就是为什么我倾向认为<code>useReducer</code>是Hooks的&quot;作弊模式&quot;。它可以把更新逻辑和描述发生了什么分开。结果是，这可以帮助我移除不必需的依赖，避免不必要的effect调用。</p>
-<h3 id="effects-2" tabindex="-1"><a class="header-anchor" href="#effects-2">#</a>把函数移到Effects里</h3>
+<h3 id="把函数移到effects里" tabindex="-1"><a class="header-anchor" href="#把函数移到effects里">¶</a>把函数移到Effects里</h3>
 <p>一个典型的误解是认为函数不应该成为依赖，举个例子，下面的代码看上去可以运行正常：</p>
 <pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">SearchResults</span>(<span class="hljs-params"></span>) {
   <span class="hljs-keyword">const</span> [data, setData] = <span class="hljs-title function_">useState</span>({ <span class="hljs-attr">hits</span>: [] });
@@ -920,7 +920,7 @@ React会根据我们当前的props和state同步到DOM。&quot;mount&quot;和&qu
 }
 </code></pre>
 <p>添加这个依赖，我们不仅仅是在&quot;取悦React&quot;。在<code>query</code>改变后去重新请求数据是合理的。useEffect的设计意图就是要强迫你关注数据流的改变，然后决定我们的effects该如何和它同步 - 而不是忽视它直到我们的用户遇到了bug。</p>
-<h3 id="effect-1" tabindex="-1"><a class="header-anchor" href="#effect-1">#</a>但我们无法把个别函数放到effect里面</h3>
+<h3 id="但我们无法把个别函数放到effect里面" tabindex="-1"><a class="header-anchor" href="#但我们无法把个别函数放到effect里面">¶</a>但我们无法把个别函数放到effect里面</h3>
 <p>有时候你可能不想把函数移入effect里。比如，组件内有几个effect使用了相同的函数，你不想在每个effect里复制黏贴一遍这个逻辑。也或许这个函数是一个prop。</p>
 <p>在这种情况下你应该忽略对函数的依赖吗？我不这么认为。再次强调，effects不应该对它的依赖撒谎。通常我们还有更好的解决办法。一个常见的误解是，“函数从来不会改变”。但是这篇文章你读到现在，你知道这显然不是事实。实际上，在组件内定义的函数每一次渲染都在变。</p>
 <p>函数每次渲染都会改变这个事实本身就是个问题。 比如有两个effects会调用 <code>getFetchUrl</code>:</p>
@@ -1049,7 +1049,7 @@ React会根据我们当前的props和state同步到DOM。&quot;mount&quot;和&qu
 }
 </code></pre>
 <p>因为<code>fetchData</code>只有在<code>Parent</code>的<code>query</code>状态变更时才会改变，所以我们的<code>Child</code>只会在需要的时候才去重新请求数据。</p>
-<h3 id="7" tabindex="-1"><a class="header-anchor" href="#7">#</a>函数是数据流的一部分吗？</h3>
+<h3 id="函数是数据流的一部分吗" tabindex="-1"><a class="header-anchor" href="#函数是数据流的一部分吗">¶</a>函数是数据流的一部分吗？</h3>
 <p>有趣的是，这种模式在class组件中行不通，并且这种行不通恰到好处地揭示了effect和生命周期范式之间的区别。考虑下面的转换：</p>
 <pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">class</span> <span class="hljs-title class_">Parent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Component</span> {
   state = {
@@ -1126,7 +1126,7 @@ React会根据我们当前的props和state同步到DOM。&quot;mount&quot;和&qu
 }
 </code></pre>
 <hr>
-<h3 id="8" tabindex="-1"><a class="header-anchor" href="#8">#</a>说说竞态</h3>
+<h3 id="说说竞态" tabindex="-1"><a class="header-anchor" href="#说说竞态">¶</a>说说竞态</h3>
 <p>下面是一个典型的在class组件里发请求的例子：</p>
 <pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">class</span> <span class="hljs-title class_">Article</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Component</span> {
   state = {
@@ -1194,7 +1194,88 @@ React会根据我们当前的props和state同步到DOM。&quot;mount&quot;和&qu
 <blockquote>
 <p>转自：<a href="https://overreacted.io/a-complete-guide-to-useeffect/">a-complete-guide-to-useeffect</a></p>
 </blockquote>
-</article></section></main><section class="app-post-footer"><div class="pure-g app-post-footer--box"><div class="pure-u-1 post-footer-updated"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>Updated at 24/07/2022 22:47</span></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#tag" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-tags"><li><a href="/adios-blogs/tags/react/1.html" title="React">React</a></li><li><a href="/adios-blogs/tags/hooks/1.html" title="Hooks">Hooks</a></li></ul></div></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#folder" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-categories"><li><a href="/adios-blogs/categories/前端/1.html" title="前端">前端</a></li></ul></div></div></div></section><style>.scroll-btn {
+</article></section></main><section class="app-post-footer"><div class="pure-g app-post-footer--box"><div class="pure-u-1 post-footer-updated"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>Updated at 24/07/2022 22:47</span></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#tag" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-tags"><li><a href="/adios-blogs/tags/react/1.html" title="React">React</a></li><li><a href="/adios-blogs/tags/hooks/1.html" title="Hooks">Hooks</a></li></ul></div></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#folder" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-categories"><li><a href="/adios-blogs/categories/前端/1.html" title="前端">前端</a></li></ul></div></div></div></section><style>body {
+    scroll-behavior: smooth;
+}
+ol.toc-list {
+    counter-reset: list-item;
+}
+li.toc-list-item {
+    display: block;
+    counter-increment: list-item;
+}
+li.toc-list-item::before {
+    content: counters(list-item,'.') ' ';
+}
+a.toc-list-item-link {
+    text-decoration: none;
+}
+
+#toc {
+    position: fixed;
+    right: -22rem;
+    top: 0;
+    width: 22rem;
+    height: 100vh;
+    transition: right .3s;
+    z-index: 1;
+    background-color: var(--toc-bg-color);
+}
+#toc.toc-show {
+    right: 0em;
+}
+#toc-container {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 2em;
+    max-height: 100%;
+    overflow-y: auto;
+}
+#toc-container > h3 { margin: 0; margin-bottom: 2em; }
+#toc-container > nav.table-of-contents ol {
+    margin: 0; padding: 0;
+}
+#toc-container > nav.table-of-contents li.toc-list-item ol {
+    padding-left: 2em;
+}
+nav.table-of-contents li.toc-list-item a.toc-list-item-link::after {
+    display: block;
+    content: '';
+    margin-bottom: 0.3em;
+}
+span#toc-btn {
+    position: absolute;
+    display: block;
+    left: -28px;
+    top: 50%;
+    bottom: 0;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    z-index: 1;
+    opacity: .5;
+}
+#toc.toc-show span#toc-btn {
+    left: 0px;
+    transition: left .3s;
+}
+
+@media screen and (max-width: 412px) {
+    #toc {
+        display: none;
+    }
+}
+</style><div class="toc-show" id="toc"><div id="toc-container"><h3>目录</h3><nav class="table-of-contents"><ol class="toc-list"><li class="toc-list-item"><a class="toc-list-item-link" href="#%E8%83%8C%E6%99%AF">背景</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E6%91%98%E8%A6%81">摘要</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E6%AF%8F%E4%B8%80%E6%AC%A1%E6%B8%B2%E6%9F%93%E9%83%BD%E6%9C%89%E5%AE%83%E8%87%AA%E5%B7%B1%E7%9A%84props%E5%92%8Cstate">每一次渲染都有它自己的Props和State</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E6%AF%8F%E4%B8%80%E6%AC%A1%E6%B8%B2%E6%9F%93%E9%83%BD%E6%9C%89%E5%AE%83%E8%87%AA%E5%B7%B1%E7%9A%84%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0">每一次渲染都有它自己的事件处理函数</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E6%AF%8F%E6%AC%A1%E6%B8%B2%E6%9F%93%E9%83%BD%E6%9C%89%E5%AE%83%E8%87%AA%E5%B7%B1%E7%9A%84effects">每次渲染都有它自己的Effects</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E6%AF%8F%E4%B8%80%E6%AC%A1%E6%B8%B2%E6%9F%93%E9%83%BD%E6%9C%89%E5%AE%83%E8%87%AA%E5%B7%B1%E7%9A%84%E2%80%A6%E6%89%80%E6%9C%89">每一次渲染都有它自己的…所有</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E9%80%86%E6%BD%AE%E8%80%8C%E5%8A%A8">逆潮而动</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#effect%E4%B8%AD%E7%9A%84%E6%B8%85%E7%90%86">Effect中的清理</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E5%90%8C%E6%AD%A5%EF%BC%8C%E8%80%8C%E9%9D%9E%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F">同步，而非生命周期</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E5%91%8A%E8%AF%89react%E5%8E%BB%E5%AF%B9%E6%AF%94%E4%BD%A0%E7%9A%84effects">告诉React去对比你的effects</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E5%88%AB%E5%AF%B9react%E6%AC%BA%E9%AA%97%E6%89%80%E9%9C%80%E7%9A%84%E4%BE%9D%E8%B5%96%E9%A1%B9">别对React欺骗所需的依赖项</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E5%A6%82%E6%9E%9C%E8%AE%BE%E7%BD%AE%E4%BA%86%E9%94%99%E8%AF%AF%E7%9A%84%E4%BE%9D%E8%B5%96%E4%BC%9A%E6%80%8E%E4%B9%88%E6%A0%B7%EF%BC%9F">如果设置了错误的依赖会怎么样？</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E4%B8%A4%E7%A7%8D%E8%AF%9A%E5%AE%9E%E5%91%8A%E7%9F%A5%E4%BE%9D%E8%B5%96%E7%9A%84%E6%96%B9%E6%B3%95">两种诚实告知依赖的方法</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E8%AE%A9effects%E8%87%AA%E7%BB%99%E8%87%AA%E8%B6%B3">让Effects自给自足</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E8%A7%A3%E8%80%A6%E6%9D%A5%E8%87%AAactions%E7%9A%84%E6%9B%B4%E6%96%B0">解耦来自Actions的更新</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88usereducer%E6%98%AFhooks%E7%9A%84%E4%BD%9C%E5%BC%8A%E6%A8%A1%E5%BC%8F">为什么useReducer是Hooks的作弊模式</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E6%8A%8A%E5%87%BD%E6%95%B0%E7%A7%BB%E5%88%B0effects%E9%87%8C">把函数移到Effects里</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E4%BD%86%E6%88%91%E4%BB%AC%E6%97%A0%E6%B3%95%E6%8A%8A%E4%B8%AA%E5%88%AB%E5%87%BD%E6%95%B0%E6%94%BE%E5%88%B0effect%E9%87%8C%E9%9D%A2">但我们无法把个别函数放到effect里面</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E5%87%BD%E6%95%B0%E6%98%AF%E6%95%B0%E6%8D%AE%E6%B5%81%E7%9A%84%E4%B8%80%E9%83%A8%E5%88%86%E5%90%97%EF%BC%9F">函数是数据流的一部分吗？</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E8%AF%B4%E8%AF%B4%E7%AB%9E%E6%80%81">说说竞态</a></li></ol></nav></div><span id="toc-btn"><svg class="icon icon" aria-hidden="true" style="width:28px;height:28px;"><use xlink:href="#map" x="0" y="0" width="28" height="28"></use></svg></span></div><script>~(function() {
+    var btn = document.getElementById('toc-btn');
+    var toc = document.getElementById('toc');
+    if (btn && toc) {
+        btn.addEventListener('click', function () {
+            toc.classList.toggle('toc-show');
+        });
+    }
+})();</script><style>.scroll-btn {
     position: fixed;
     display: none;
     right: 3em;
@@ -1256,4 +1337,4 @@ function debouce(callback, ms) {
         window.onscroll = debouce(setStyle, 500);
     }
     btns = null;
-})();</script><footer class="pure-g app-footer"><div class="pure-u-1"><div class="pure-g"><div class="pure-u-1"><abbr class="share-license" title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.">CC BY-NC 4.0</abbr><span class="copyright">&copy; wiskewu. 2022</span></div><div class="pure-u-1 last-update">站点最后更新于: 11/26/2022</div></div></div></footer></div></div></body><script src="/adios-blogs/statics/js/main.js"></script></html>
+})();</script><footer class="pure-g app-footer"><div class="pure-u-1"><div class="pure-g"><div class="pure-u-1"><abbr class="share-license" title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.">CC BY-NC 4.0</abbr><span class="copyright">&copy; wiskewu. 2022</span></div><div class="pure-u-1 last-update">站点始于: 2022/07/17 最后更新于: 11/26/2022</div></div></div></footer></div></div></body><script src="/adios-blogs/statics/js/main.js"></script></html>

@@ -1,17 +1,17 @@
-<html lang="zh"><head><title>Adiós Blog - 在npm上发布带有scope命名空间的库</title><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="Adiós的个人博客网站"/><meta name="author"/><meta name="kewords" content="Adiós's independent blog"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss-min@2.1.0.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-base-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-grids-responsive-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/theme.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/layout.css"/><link rel="apple-touch-icon" sizes="180x180" href="/adios-blogs/statics/icons/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/adios-blogs/statics/icons/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/adios-blogs/statics/icons/favicon-16x16.png"/><link rel="manifest" href="/adios-blogs/statics/icons/site.webmanifest"/><link id="hl-github" rel="stylesheet" href="/adios-blogs/statics/css/highlight.js/github.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/markdown.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/post.css"/></head><body class="theme-light"><div id="app"><div id="app-container"><header class="app-post-header pure-g"><div class="pure-u-1"><div class="pure-g app-post-header--box"><h1 class="pure-u-1 post-header-title">在npm上发布带有scope命名空间的库</h1><div class="pure-u-1 post-header-info"><p class="post-header-info--created"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>23/07/2022 16:31</span></p><span class="post-header-info--divider">·</span><p class="post-header-info--author"><svg class="icon icon" aria-hidden="true"><use xlink:href="#pencil-alt" x="0" y="0" width="16" height="16"></use></svg><span>wiskewu</span></p></div></div></div></header><div class="pure-g app-post-navigation"><span click="toggleTheme()"><a href="/adios-blogs/"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#home" x="0" y="0" width="24" height="24"></use></svg></a></span><span class="theme-btn" onclick="toggleTheme(this)"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#sun" x="0" y="0" width="24" height="24"></use></svg></span></div><hr/><main class="app-body"><section class="app-post-body"><article class="markdown app-post-body-content"><h4 id="organization" tabindex="-1"><a class="header-anchor" href="#organization">#</a>新建Organization</h4>
+<html lang="zh"><head><title>Adiós Blog - 在npm上发布带有scope命名空间的库</title><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="Adiós的个人博客网站"/><meta name="author"/><meta name="kewords" content="Adiós's independent blog"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss-min@2.1.0.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-base-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-grids-responsive-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/theme.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/layout.css"/><link rel="apple-touch-icon" sizes="180x180" href="/adios-blogs/statics/icons/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/adios-blogs/statics/icons/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/adios-blogs/statics/icons/favicon-16x16.png"/><link rel="manifest" href="/adios-blogs/statics/icons/site.webmanifest"/><link id="hl-github" rel="stylesheet" href="/adios-blogs/statics/css/highlight.js/github.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/markdown.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/katex/katex.min@0.5.1.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/post.css"/></head><body class="theme-light"><div id="app"><div id="app-container"><header class="app-post-header pure-g"><div class="pure-u-1"><div class="pure-g app-post-header--box"><h1 class="pure-u-1 post-header-title">在npm上发布带有scope命名空间的库</h1><div class="pure-u-1 post-header-info"><p class="post-header-info--created"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>23/07/2022 16:31</span></p><span class="post-header-info--divider">·</span><p class="post-header-info--author"><svg class="icon icon" aria-hidden="true"><use xlink:href="#pencil-alt" x="0" y="0" width="16" height="16"></use></svg><span>wiskewu</span></p></div></div></div></header><div class="pure-g app-post-navigation"><span click="toggleTheme()"><a href="/adios-blogs/"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#home" x="0" y="0" width="24" height="24"></use></svg></a></span><span class="theme-btn" onclick="toggleTheme(this)"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#sun" x="0" y="0" width="24" height="24"></use></svg></span></div><hr/><main class="app-body"><section class="app-post-body"><article class="markdown app-post-body-content"><h4 id="新建organization" tabindex="-1"><a class="header-anchor" href="#新建organization">¶</a>新建Organization</h4>
 <p>到个人主页<a href="https://www.npmjs.com/settings/wiskewu/profile">NPMJS</a>找到Organizations, 点击“+”进入<a href="https://www.npmjs.com/org/create">create</a>页面，输入<code>scoped</code>名称，如<code>wiske</code>:</p>
 <p><img src="/adios-blogs/assets/posts/202207/20220723-create-a-new-organization.png" alt="create-a-new-organization"></p>
 <blockquote>
 <p>注意名称无需以’@'字符开头<br>
 选择<code>Unlimited public packages</code>并点击<code>Create</code>按钮，即可完成创建。</p>
 </blockquote>
-<h4 id="1669440943228-001" tabindex="-1"><a class="header-anchor" href="#1669440943228-001">#</a>更改自己包的名称</h4>
+<h4 id="更改自己包的名称" tabindex="-1"><a class="header-anchor" href="#更改自己包的名称">¶</a>更改自己包的名称</h4>
 <p>选择要发布的新包，修改<code>package.json</code>的<code>name</code>字段，如:</p>
 <pre class="language-json" data-lang="JSON"><code><span class="hljs-punctuation">{</span>
     <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;@wiske/adios-theme-default&quot;</span>
 <span class="hljs-punctuation">}</span>
 </code></pre>
-<h4 id="npm" tabindex="-1"><a class="header-anchor" href="#npm">#</a>登陆NPM并发布</h4>
+<h4 id="登陆npm并发布" tabindex="-1"><a class="header-anchor" href="#登陆npm并发布">¶</a>登陆NPM并发布</h4>
 <p>包一切准备就绪后，登陆npm并进行发布操作：</p>
 <pre class="language-bash" data-lang="Bash"><code>npm login
 npm publish --access public
@@ -20,7 +20,88 @@ npm publish --access public
 <p>注意此处的<code>--access public</code>必须加，否则无法进行发布;<br>
 此处您的github项目链接仍然可以保持不带<code>scoped</code>，比如<a href="https://github.com/wiskewu/adios-theme-default">这里</a>;</p>
 </blockquote>
-</article></section></main><section class="app-post-footer"><div class="pure-g app-post-footer--box"><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#tag" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-tags"><li><a href="/adios-blogs/tags/npm/1.html" title="npm">npm</a></li></ul></div></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#folder" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-categories"><li><a href="/adios-blogs/categories/前端/1.html" title="前端">前端</a></li></ul></div></div></div></section><style>.scroll-btn {
+</article></section></main><section class="app-post-footer"><div class="pure-g app-post-footer--box"><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#tag" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-tags"><li><a href="/adios-blogs/tags/npm/1.html" title="npm">npm</a></li></ul></div></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#folder" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-categories"><li><a href="/adios-blogs/categories/前端/1.html" title="前端">前端</a></li></ul></div></div></div></section><style>body {
+    scroll-behavior: smooth;
+}
+ol.toc-list {
+    counter-reset: list-item;
+}
+li.toc-list-item {
+    display: block;
+    counter-increment: list-item;
+}
+li.toc-list-item::before {
+    content: counters(list-item,'.') ' ';
+}
+a.toc-list-item-link {
+    text-decoration: none;
+}
+
+#toc {
+    position: fixed;
+    right: -22rem;
+    top: 0;
+    width: 22rem;
+    height: 100vh;
+    transition: right .3s;
+    z-index: 1;
+    background-color: var(--toc-bg-color);
+}
+#toc.toc-show {
+    right: 0em;
+}
+#toc-container {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 2em;
+    max-height: 100%;
+    overflow-y: auto;
+}
+#toc-container > h3 { margin: 0; margin-bottom: 2em; }
+#toc-container > nav.table-of-contents ol {
+    margin: 0; padding: 0;
+}
+#toc-container > nav.table-of-contents li.toc-list-item ol {
+    padding-left: 2em;
+}
+nav.table-of-contents li.toc-list-item a.toc-list-item-link::after {
+    display: block;
+    content: '';
+    margin-bottom: 0.3em;
+}
+span#toc-btn {
+    position: absolute;
+    display: block;
+    left: -28px;
+    top: 50%;
+    bottom: 0;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    z-index: 1;
+    opacity: .5;
+}
+#toc.toc-show span#toc-btn {
+    left: 0px;
+    transition: left .3s;
+}
+
+@media screen and (max-width: 412px) {
+    #toc {
+        display: none;
+    }
+}
+</style><div class="toc-show" id="toc"><div id="toc-container"><h3>目录</h3><nav class="table-of-contents"><ol class="toc-list"><li class="toc-list-item"><a class="toc-list-item-link" href="#%E6%96%B0%E5%BB%BAorganization">新建Organization</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E6%9B%B4%E6%94%B9%E8%87%AA%E5%B7%B1%E5%8C%85%E7%9A%84%E5%90%8D%E7%A7%B0">更改自己包的名称</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E7%99%BB%E9%99%86npm%E5%B9%B6%E5%8F%91%E5%B8%83">登陆NPM并发布</a></li></ol></nav></div><span id="toc-btn"><svg class="icon icon" aria-hidden="true" style="width:28px;height:28px;"><use xlink:href="#map" x="0" y="0" width="28" height="28"></use></svg></span></div><script>~(function() {
+    var btn = document.getElementById('toc-btn');
+    var toc = document.getElementById('toc');
+    if (btn && toc) {
+        btn.addEventListener('click', function () {
+            toc.classList.toggle('toc-show');
+        });
+    }
+})();</script><style>.scroll-btn {
     position: fixed;
     display: none;
     right: 3em;
@@ -82,4 +163,4 @@ function debouce(callback, ms) {
         window.onscroll = debouce(setStyle, 500);
     }
     btns = null;
-})();</script><footer class="pure-g app-footer"><div class="pure-u-1"><div class="pure-g"><div class="pure-u-1"><abbr class="share-license" title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.">CC BY-NC 4.0</abbr><span class="copyright">&copy; wiskewu. 2022</span></div><div class="pure-u-1 last-update">站点最后更新于: 11/26/2022</div></div></div></footer></div></div></body><script src="/adios-blogs/statics/js/main.js"></script></html>
+})();</script><footer class="pure-g app-footer"><div class="pure-u-1"><div class="pure-g"><div class="pure-u-1"><abbr class="share-license" title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.">CC BY-NC 4.0</abbr><span class="copyright">&copy; wiskewu. 2022</span></div><div class="pure-u-1 last-update">站点始于: 2022/07/17 最后更新于: 11/26/2022</div></div></div></footer></div></div></body><script src="/adios-blogs/statics/js/main.js"></script></html>

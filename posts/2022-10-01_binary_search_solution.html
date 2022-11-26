@@ -1,4 +1,4 @@
-<html lang="zh"><head><title>Adiós Blog - 二分查找</title><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="Adiós的个人博客网站"/><meta name="author"/><meta name="kewords" content="Adiós's independent blog"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss-min@2.1.0.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-base-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-grids-responsive-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/theme.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/layout.css"/><link rel="apple-touch-icon" sizes="180x180" href="/adios-blogs/statics/icons/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/adios-blogs/statics/icons/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/adios-blogs/statics/icons/favicon-16x16.png"/><link rel="manifest" href="/adios-blogs/statics/icons/site.webmanifest"/><link id="hl-github" rel="stylesheet" href="/adios-blogs/statics/css/highlight.js/github.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/markdown.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/post.css"/></head><body class="theme-light"><div id="app"><div id="app-container"><header class="app-post-header pure-g"><div class="pure-u-1"><div class="pure-g app-post-header--box"><h1 class="pure-u-1 post-header-title">二分查找</h1><div class="pure-u-1 post-header-info"><p class="post-header-info--created"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>01/10/2022 16:51</span></p><span class="post-header-info--divider">·</span><p class="post-header-info--author"><svg class="icon icon" aria-hidden="true"><use xlink:href="#pencil-alt" x="0" y="0" width="16" height="16"></use></svg><span>wiskewu</span></p></div></div></div></header><div class="pure-g app-post-navigation"><span click="toggleTheme()"><a href="/adios-blogs/"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#home" x="0" y="0" width="24" height="24"></use></svg></a></span><span class="theme-btn" onclick="toggleTheme(this)"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#sun" x="0" y="0" width="24" height="24"></use></svg></span></div><hr/><main class="app-body"><section class="app-post-body"><article class="markdown app-post-body-content"><h2 id="1669440943571-001" tabindex="-1"><a class="header-anchor" href="#1669440943571-001">#</a>题目</h2>
+<html lang="zh"><head><title>Adiós Blog - 二分查找</title><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="Adiós的个人博客网站"/><meta name="author"/><meta name="kewords" content="Adiós's independent blog"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss-min@2.1.0.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-base-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-grids-responsive-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/theme.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/layout.css"/><link rel="apple-touch-icon" sizes="180x180" href="/adios-blogs/statics/icons/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/adios-blogs/statics/icons/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/adios-blogs/statics/icons/favicon-16x16.png"/><link rel="manifest" href="/adios-blogs/statics/icons/site.webmanifest"/><link id="hl-github" rel="stylesheet" href="/adios-blogs/statics/css/highlight.js/github.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/markdown.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/katex/katex.min@0.5.1.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/post.css"/></head><body class="theme-light"><div id="app"><div id="app-container"><header class="app-post-header pure-g"><div class="pure-u-1"><div class="pure-g app-post-header--box"><h1 class="pure-u-1 post-header-title">二分查找</h1><div class="pure-u-1 post-header-info"><p class="post-header-info--created"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>01/10/2022 16:51</span></p><span class="post-header-info--divider">·</span><p class="post-header-info--author"><svg class="icon icon" aria-hidden="true"><use xlink:href="#pencil-alt" x="0" y="0" width="16" height="16"></use></svg><span>wiskewu</span></p></div></div></div></header><div class="pure-g app-post-navigation"><span click="toggleTheme()"><a href="/adios-blogs/"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#home" x="0" y="0" width="24" height="24"></use></svg></a></span><span class="theme-btn" onclick="toggleTheme(this)"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#sun" x="0" y="0" width="24" height="24"></use></svg></span></div><hr/><main class="app-body"><section class="app-post-body"><article class="markdown app-post-body-content"><h2 id="题目" tabindex="-1"><a class="header-anchor" href="#题目">¶</a>题目</h2>
 <p>来自力扣地址: <a href="https://leetcode.cn/problems/binary-search/">704-二分查找</a>;</p>
 <p>给定一个<code>n</code>个元素有序的（升序）整型数组<code>nums</code>和一个目标值<code>target</code>，写一个函数搜索<code>nums</code>中的<code>target</code>，如果目标值存在返回下标，否则返回 <code>-1</code>。</p>
 <p>示例一：</p>
@@ -17,10 +17,10 @@
 <li>n 将在 [1, 10000]之间</li>
 <li>nums 的每个元素都将在 [-9999, 9999]之间</li>
 </ol>
-<h2 id="1" tabindex="-1"><a class="header-anchor" href="#1">#</a>解法</h2>
+<h2 id="解法" tabindex="-1"><a class="header-anchor" href="#解法">¶</a>解法</h2>
 <p>主要使用到了二分查找算法。</p>
 <p>主要思想就是在随机位置(此处使用中间位置<code>mid</code>的值)取一个值，通过与目标值<code>target</code>进行比较，若大于目标值，则说明目标值可能在<code>mid</code>位置右侧；若小于目标值，则说明目标值可能在<code>mid</code>左侧；若与目标值相等，则返回<code>mid</code>。重复上述步骤至区间无效或找到结果，返回<code>-1</code>或结果值。</p>
-<h3 id="2" tabindex="-1"><a class="header-anchor" href="#2">#</a>解法一</h3>
+<h3 id="解法一" tabindex="-1"><a class="header-anchor" href="#解法一">¶</a>解法一</h3>
 <p>使用<code>while</code>循环：</p>
 <pre class="language-c" data-lang="C"><code><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span>
 
@@ -46,7 +46,7 @@
     <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
 }
 </code></pre>
-<h3 id="3" tabindex="-1"><a class="header-anchor" href="#3">#</a>解法二</h3>
+<h3 id="解法二" tabindex="-1"><a class="header-anchor" href="#解法二">¶</a>解法二</h3>
 <p>使用递归：</p>
 <pre class="language-c" data-lang="C"><code><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span>
 
@@ -71,9 +71,90 @@
     <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
 }
 </code></pre>
-<h3 id="4" tabindex="-1"><a class="header-anchor" href="#4">#</a>其他</h3>
-<p>二分查找算法时间复杂度为$O(\log N)$</p>
-</article></section></main><section class="app-post-footer"><div class="pure-g app-post-footer--box"><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#tag" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-tags"><li><a href="/adios-blogs/tags/c/1.html" title="c">c</a></li><li><a href="/adios-blogs/tags/solution/1.html" title="solution">solution</a></li></ul></div></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#folder" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-categories"><li><a href="/adios-blogs/categories/algorithm/1.html" title="Algorithm">Algorithm</a></li></ul></div></div></div></section><style>.scroll-btn {
+<h3 id="其他" tabindex="-1"><a class="header-anchor" href="#其他">¶</a>其他</h3>
+<p>二分查找算法时间复杂度为<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>log</mi><mi>N</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(\log N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.75em;"></span><span class="strut bottom" style="height:1em;vertical-align:-0.25em;"></span><span class="base textstyle uncramped"><span class="mord mathit" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mord mathit" style="margin-right:0.10903em;">N</span><span class="mclose">)</span></span></span></span></p>
+</article></section></main><section class="app-post-footer"><div class="pure-g app-post-footer--box"><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#tag" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-tags"><li><a href="/adios-blogs/tags/c/1.html" title="c">c</a></li><li><a href="/adios-blogs/tags/solution/1.html" title="solution">solution</a></li></ul></div></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#folder" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-categories"><li><a href="/adios-blogs/categories/algorithm/1.html" title="Algorithm">Algorithm</a></li></ul></div></div></div></section><style>body {
+    scroll-behavior: smooth;
+}
+ol.toc-list {
+    counter-reset: list-item;
+}
+li.toc-list-item {
+    display: block;
+    counter-increment: list-item;
+}
+li.toc-list-item::before {
+    content: counters(list-item,'.') ' ';
+}
+a.toc-list-item-link {
+    text-decoration: none;
+}
+
+#toc {
+    position: fixed;
+    right: -22rem;
+    top: 0;
+    width: 22rem;
+    height: 100vh;
+    transition: right .3s;
+    z-index: 1;
+    background-color: var(--toc-bg-color);
+}
+#toc.toc-show {
+    right: 0em;
+}
+#toc-container {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 2em;
+    max-height: 100%;
+    overflow-y: auto;
+}
+#toc-container > h3 { margin: 0; margin-bottom: 2em; }
+#toc-container > nav.table-of-contents ol {
+    margin: 0; padding: 0;
+}
+#toc-container > nav.table-of-contents li.toc-list-item ol {
+    padding-left: 2em;
+}
+nav.table-of-contents li.toc-list-item a.toc-list-item-link::after {
+    display: block;
+    content: '';
+    margin-bottom: 0.3em;
+}
+span#toc-btn {
+    position: absolute;
+    display: block;
+    left: -28px;
+    top: 50%;
+    bottom: 0;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    z-index: 1;
+    opacity: .5;
+}
+#toc.toc-show span#toc-btn {
+    left: 0px;
+    transition: left .3s;
+}
+
+@media screen and (max-width: 412px) {
+    #toc {
+        display: none;
+    }
+}
+</style><div class="toc-show" id="toc"><div id="toc-container"><h3>目录</h3><nav class="table-of-contents"><ol class="toc-list"><li class="toc-list-item"><a class="toc-list-item-link" href="#%E9%A2%98%E7%9B%AE">题目</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E8%A7%A3%E6%B3%95">解法</a><ol class="toc-list"><li class="toc-list-item"><a class="toc-list-item-link" href="#%E8%A7%A3%E6%B3%95%E4%B8%80">解法一</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E8%A7%A3%E6%B3%95%E4%BA%8C">解法二</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E5%85%B6%E4%BB%96">其他</a></li></ol></li></ol></nav></div><span id="toc-btn"><svg class="icon icon" aria-hidden="true" style="width:28px;height:28px;"><use xlink:href="#map" x="0" y="0" width="28" height="28"></use></svg></span></div><script>~(function() {
+    var btn = document.getElementById('toc-btn');
+    var toc = document.getElementById('toc');
+    if (btn && toc) {
+        btn.addEventListener('click', function () {
+            toc.classList.toggle('toc-show');
+        });
+    }
+})();</script><style>.scroll-btn {
     position: fixed;
     display: none;
     right: 3em;
@@ -135,4 +216,4 @@ function debouce(callback, ms) {
         window.onscroll = debouce(setStyle, 500);
     }
     btns = null;
-})();</script><footer class="pure-g app-footer"><div class="pure-u-1"><div class="pure-g"><div class="pure-u-1"><abbr class="share-license" title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.">CC BY-NC 4.0</abbr><span class="copyright">&copy; wiskewu. 2022</span></div><div class="pure-u-1 last-update">站点最后更新于: 11/26/2022</div></div></div></footer></div></div></body><script src="/adios-blogs/statics/js/main.js"></script></html>
+})();</script><footer class="pure-g app-footer"><div class="pure-u-1"><div class="pure-g"><div class="pure-u-1"><abbr class="share-license" title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.">CC BY-NC 4.0</abbr><span class="copyright">&copy; wiskewu. 2022</span></div><div class="pure-u-1 last-update">站点始于: 2022/07/17 最后更新于: 11/26/2022</div></div></div></footer></div></div></body><script src="/adios-blogs/statics/js/main.js"></script></html>

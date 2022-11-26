@@ -1,6 +1,6 @@
-<html lang="zh"><head><title>Adiós Blog - Command Line Api Reference</title><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="Adiós的个人博客网站"/><meta name="author"/><meta name="kewords" content="Adiós's independent blog"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss-min@2.1.0.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-base-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-grids-responsive-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/theme.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/layout.css"/><link rel="apple-touch-icon" sizes="180x180" href="/adios-blogs/statics/icons/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/adios-blogs/statics/icons/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/adios-blogs/statics/icons/favicon-16x16.png"/><link rel="manifest" href="/adios-blogs/statics/icons/site.webmanifest"/><link id="hl-github" rel="stylesheet" href="/adios-blogs/statics/css/highlight.js/github.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/markdown.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/post.css"/></head><body class="theme-light"><div id="app"><div id="app-container"><header class="app-post-header pure-g"><div class="pure-u-1"><div class="pure-g app-post-header--box"><h1 class="pure-u-1 post-header-title">Command Line Api Reference</h1><div class="pure-u-1 post-header-info"><p class="post-header-info--created"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>04/09/2022 16:39</span></p><span class="post-header-info--divider">·</span><p class="post-header-info--author"><svg class="icon icon" aria-hidden="true"><use xlink:href="#pencil-alt" x="0" y="0" width="16" height="16"></use></svg><span>wiskewu</span></p></div></div></div></header><div class="pure-g app-post-navigation"><span click="toggleTheme()"><a href="/adios-blogs/"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#home" x="0" y="0" width="24" height="24"></use></svg></a></span><span class="theme-btn" onclick="toggleTheme(this)"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#sun" x="0" y="0" width="24" height="24"></use></svg></span></div><hr/><main class="app-body"><section class="app-post-body"><article class="markdown app-post-body-content"><h4 id="1669440943552-001" tabindex="-1"><a class="header-anchor" href="#1669440943552-001">#</a>简介</h4>
+<html lang="zh"><head><title>Adiós Blog - Command Line Api Reference</title><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="Adiós的个人博客网站"/><meta name="author"/><meta name="kewords" content="Adiós's independent blog"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss-min@2.1.0.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-base-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-grids-responsive-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/theme.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/layout.css"/><link rel="apple-touch-icon" sizes="180x180" href="/adios-blogs/statics/icons/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/adios-blogs/statics/icons/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/adios-blogs/statics/icons/favicon-16x16.png"/><link rel="manifest" href="/adios-blogs/statics/icons/site.webmanifest"/><link id="hl-github" rel="stylesheet" href="/adios-blogs/statics/css/highlight.js/github.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/markdown.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/katex/katex.min@0.5.1.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/post.css"/></head><body class="theme-light"><div id="app"><div id="app-container"><header class="app-post-header pure-g"><div class="pure-u-1"><div class="pure-g app-post-header--box"><h1 class="pure-u-1 post-header-title">Command Line Api Reference</h1><div class="pure-u-1 post-header-info"><p class="post-header-info--created"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>04/09/2022 16:39</span></p><span class="post-header-info--divider">·</span><p class="post-header-info--author"><svg class="icon icon" aria-hidden="true"><use xlink:href="#pencil-alt" x="0" y="0" width="16" height="16"></use></svg><span>wiskewu</span></p></div></div></div></header><div class="pure-g app-post-navigation"><span click="toggleTheme()"><a href="/adios-blogs/"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#home" x="0" y="0" width="24" height="24"></use></svg></a></span><span class="theme-btn" onclick="toggleTheme(this)"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#sun" x="0" y="0" width="24" height="24"></use></svg></span></div><hr/><main class="app-body"><section class="app-post-body"><article class="markdown app-post-body-content"><h4 id="简介" tabindex="-1"><a class="header-anchor" href="#简介">¶</a>简介</h4>
 <p><code>Command Line API</code>是<code>Google Chrome</code>浏览器为开发者提供的执行常见任务的工具函数集合。包含了一些快捷函数用于快速选择和审查DOM元素、启动和停止分析器、监听DOM事件等。</p>
-<h4 id="1" tabindex="-1"><a class="header-anchor" href="#1">#</a>快速开始</h4>
+<h4 id="快速开始" tabindex="-1"><a class="header-anchor" href="#快速开始">¶</a>快速开始</h4>
 <p><code>Command Line API</code>仅能在<code>Chrome DevTools Console</code>中使用。如果尝试在脚本中调用它们，它们将无法工作。</p>
 <p>可以使用下述方式快速了解当前Chrome提供了哪些Command Line API：</p>
 <ol>
@@ -33,39 +33,39 @@ keyList2.<span class="hljs-title function_">filter</span>(<span class="hljs-func
 </ol>
 <p>(上述原理实际上就是因为在调试控制台可以获取到挂载在window下特有的属性，而在普通脚本里是获取不到的)</p>
 <p>接下来，让我们逐个了解这些API吧。</p>
-<h4 id="dollar_" tabindex="-1"><a class="header-anchor" href="#dollar_">#</a>$_</h4>
+<h4 id="dollar_" tabindex="-1"><a class="header-anchor" href="#dollar_">¶</a>$_</h4>
 <p><code>$_</code>返回最近一次计算表达式执行的结果。</p>
 <p><img src="/adios-blogs/assets/posts/202209/2022-09-04-command-line-api-%24_.png" alt="$_"></p>
-<h4 id="dollar0-dollar4" tabindex="-1"><a class="header-anchor" href="#dollar0-dollar4">#</a>$0 - $4</h4>
+<h4 id="dollar0dollar4" tabindex="-1"><a class="header-anchor" href="#dollar0dollar4">¶</a>$0 - $4</h4>
 <p><strong>开发者工具</strong>会缓存我们在<strong>元素</strong>选项卡（或配置文件面板）中选择的最后五个 DOM 元素（或 JavaScript 堆对象）, 并分别使用<code>$0</code>、<code>$1</code>、<code>$2</code>、<code>$3</code>、<code>$4</code>表示。</p>
 <p>其中，<code>$0</code>表示上一次选择的元素或JS对象，<code>$1</code>表示倒数第二次选择的元素或JS对象，并依次类推，<code>$4</code>表示倒数第五次选择元素或JS对象。</p>
 <p>如下图，从上至下依次点击dom节点，查看缓存的节点内容：</p>
 <p><img src="/adios-blogs/assets/posts/202209/2022-09-04-command-line-api-%240-%244.gif" alt="$0-$4"></p>
-<h4 id="dollar(selector)" tabindex="-1"><a class="header-anchor" href="#dollar(selector)">#</a>$(selector)</h4>
+<h4 id="dollar(selector)" tabindex="-1"><a class="header-anchor" href="#dollar(selector)">¶</a>$(selector)</h4>
 <p><code>$</code>提供类似于<code>JQuery</code>的选择器功能，返回特定 CSS 选择器代表的第一个 DOM 节点元素。这个函数实际上是<code>document.querySelector()</code>的别名。</p>
 <p><img src="/adios-blogs/assets/posts/202209/2022-09-04_command-line-api-%24.png" alt="$"></p>
-<h4 id="dollardollar(selector)" tabindex="-1"><a class="header-anchor" href="#dollardollar(selector)">#</a>$$(selector)</h4>
+<h4 id="dollardollar(selector)" tabindex="-1"><a class="header-anchor" href="#dollardollar(selector)">¶</a>$$(selector)</h4>
 <p>与<code>$</code>类似，<code>$$</code>作为<code>document.querySelectorAll()</code>的别名函数，返回匹配给定 CSS 选择器的 DOM 元素集合。</p>
 <p><img src="/adios-blogs/assets/posts/202209/2022-09-04-command-line-api-%24%24.png" alt="$$"></p>
-<h4 id="dollarx(xpath)" tabindex="-1"><a class="header-anchor" href="#dollarx(xpath)">#</a>$x(xpath)</h4>
+<h4 id="dollarx(xpath)" tabindex="-1"><a class="header-anchor" href="#dollarx(xpath)">¶</a>$x(xpath)</h4>
 <p>返回匹配给定<code>XPath</code>的 DOM 节点集合。</p>
 <p><img src="/adios-blogs/assets/posts/202209/2022-09-13-command-line-api-%24x.gif" alt="$x"></p>
 <blockquote>
 <p>XPath语法可参见<a href="https://www.runoob.com/xpath/xpath-tutorial.html">此处</a></p>
 </blockquote>
-<h4 id="clear()" tabindex="-1"><a class="header-anchor" href="#clear()">#</a>clear()</h4>
+<h4 id="clear()" tabindex="-1"><a class="header-anchor" href="#clear()">¶</a>clear()</h4>
 <p>清除控制台内容。与<code>console.clear()</code>等价。</p>
-<h4 id="copy(object)" tabindex="-1"><a class="header-anchor" href="#copy(object)">#</a>copy(object)</h4>
+<h4 id="copy(object)" tabindex="-1"><a class="header-anchor" href="#copy(object)">¶</a>copy(object)</h4>
 <p>将指定对象以字符串表示形式复制到剪贴板。</p>
 <p><img src="/adios-blogs/assets/posts/202209/2022-09-13-command-line-api-copy.gif" alt="copy"></p>
 <blockquote>
 <p>通常会与调试断点时拷贝变量值配合使用。</p>
 </blockquote>
-<h4 id="debug(function)-and-undebug(function)" tabindex="-1"><a class="header-anchor" href="#debug(function)-and-undebug(function)">#</a>debug(function) &amp; undebug(function)</h4>
+<h4 id="debug(function)andundebug(function)" tabindex="-1"><a class="header-anchor" href="#debug(function)andundebug(function)">¶</a>debug(function) &amp; undebug(function)</h4>
 <p>当调用指定的函数时，调试器将被调用，并会在 <code>Sources</code> 面板上的函数内部中断，从而能够单步执行代码并对其进行调试。</p>
 <p><img src="/adios-blogs/assets/posts/202209/2022-09-13-command-line-api-debug.gif" alt="debug"></p>
 <p>可以使用<code>undebug(function)</code>停止断点，或使用<code>Sources</code> 面板上的UI进行断点控制。</p>
-<h4 id="dir(obj)" tabindex="-1"><a class="header-anchor" href="#dir(obj)">#</a>dir(obj)</h4>
+<h4 id="dir(obj)" tabindex="-1"><a class="header-anchor" href="#dir(obj)">¶</a>dir(obj)</h4>
 <p>以对象形式显示指定对象的所有属性列表。此方法是 <code>console.dir()</code> 的别名。</p>
 <p>下面的例子显示了直接打印<code>document.body</code>与使用<code>dir(document.object)</code>的区别：</p>
 <pre class="language-js" data-lang="Javascript"><code><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>); <span class="hljs-comment">// 节点树</span>
@@ -73,38 +73,38 @@ keyList2.<span class="hljs-title function_">filter</span>(<span class="hljs-func
 <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">dir</span>(<span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>); <span class="hljs-comment">// 对象节点</span>
 </code></pre>
 <p><img src="/adios-blogs/assets/posts/202209/2022-09-13-command-line-api-dir.png" alt="dir"></p>
-<h4 id="dirxml(object)" tabindex="-1"><a class="header-anchor" href="#dirxml(object)">#</a>dirxml(object)</h4>
+<h4 id="dirxml(object)" tabindex="-1"><a class="header-anchor" href="#dirxml(object)">¶</a>dirxml(object)</h4>
 <p>打印指定对象的 <code>XML</code> 表示，如 <code>Elements</code> 选项卡中所示。此方法等价于 <code>console.dirxml()</code> 方法。</p>
 <p>显示一个明确的 <code>XML/HTML</code> 元素的包括所有后代元素的交互树。如果无法作为一个 <code>element</code> 被显示，那么会以 JavaScript 对象的形式作为替代。它的输出是一个继承的扩展的节点列表，可以让你看到子节点的内容。</p>
 <p><img src="/adios-blogs/assets/posts/202209/2022-09-13-command-line-api-dirxml.png" alt="dirxml"></p>
-<h4 id="inspect(objectfunction)" tabindex="-1"><a class="header-anchor" href="#inspect(objectfunction)">#</a>inspect(object/function)</h4>
+<h4 id="inspect(objectfunction)" tabindex="-1"><a class="header-anchor" href="#inspect(objectfunction)">¶</a>inspect(object/function)</h4>
 <p>在适当的面板中打开并选择指定的元素或对象：若为DOM 元素，则打开 <code>Elements</code> 面板；若为 JavaScript 堆对象，则打开 <code>Profiles</code> 面板。</p>
 <pre class="language-js" data-lang="Javascript"><code><span class="hljs-title function_">inspect</span>(<span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>.<span class="hljs-property">firstChild</span>);
 </code></pre>
 <p>当传递一个函数进行检查时，调用该函数时，它将在 <code>Sources</code> 面板中打开它供我们检查。</p>
 <p><img src="/adios-blogs/assets/posts/202209/2022-09-13-command-line-api-inspect.gif" alt="inspect"></p>
-<h4 id="geteventlisteners(object)" tabindex="-1"><a class="header-anchor" href="#geteventlisteners(object)">#</a>getEventListeners(object)</h4>
+<h4 id="geteventlisteners(object)" tabindex="-1"><a class="header-anchor" href="#geteventlisteners(object)">¶</a>getEventListeners(object)</h4>
 <p>返回在指定对象上注册的事件监听器。返回值是一个对象，包含每个注册的事件类型的数组（例如，&quot;click&quot;或 “keydown”）。每个数组的成员是描述为每种类型注册的监听器的对象。</p>
 <p>例如，下面列出了在文档对象上注册的所有事件监听器。</p>
 <pre class="language-js" data-lang="Javascript"><code><span class="hljs-title function_">getEventListeners</span>(<span class="hljs-variable language_">document</span>);
 </code></pre>
 <p><img src="/adios-blogs/assets/posts/202209/2022-09-13-command-line-api-getEventListeners.png" alt="getEventListeners"></p>
 <p>如果在指定的对象上注册了一个以上的监听器，那么这个数组就包含了每个监听器的成员。</p>
-<h4 id="keys(object)-and-values(object)" tabindex="-1"><a class="header-anchor" href="#keys(object)-and-values(object)">#</a>keys(object) &amp; values(object)</h4>
+<h4 id="keys(object)andvalues(object)" tabindex="-1"><a class="header-anchor" href="#keys(object)andvalues(object)">¶</a>keys(object) &amp; values(object)</h4>
 <p><code>keys(object)</code>返回一个数组，其中包含属于指定对象的属性的键名。</p>
 <p><code>values(object)</code>返回一个数组，其中包含属于指定对象的属性的值。</p>
 <p><img src="/adios-blogs/assets/posts/202209/2022-09-13-command-line-api-keys.png" alt="keys"></p>
-<h4 id="monitor(function)-and-unmonitor(function)" tabindex="-1"><a class="header-anchor" href="#monitor(function)-and-unmonitor(function)">#</a>monitor(function) &amp; unmonitor(function)</h4>
+<h4 id="monitor(function)andunmonitor(function)" tabindex="-1"><a class="header-anchor" href="#monitor(function)andunmonitor(function)">¶</a>monitor(function) &amp; unmonitor(function)</h4>
 <p>当调用指定的函数时，控制台会记录一条消息，指示函数名称以及在调用函数时传递给函数的参数。</p>
 <p><img src="/adios-blogs/assets/posts/202209/2022-09-13-command-line-api-monitor.png" alt="monitor"></p>
 <p>使用<code>unmonitor(function)</code>停止监视。</p>
-<h4 id="monitorevents(object-events)" tabindex="-1"><a class="header-anchor" href="#monitorevents(object-events)">#</a>monitorEvents(object[, events])</h4>
+<h4 id="monitorevents(objectevents)" tabindex="-1"><a class="header-anchor" href="#monitorevents(objectevents)">¶</a>monitorEvents(object[, events])</h4>
 <p>当一个指定的事件发生在指定的对象上时，事件对象被记录到控制台。你可以指定一个单一的事件来监视，一个事件数组，或者一个通用的事件 “类型”，这些事件被映射到一个预定义的事件集合。</p>
 <p>如下监听了window的点击事件：</p>
 <pre class="language-js" data-lang="Javascript"><code><span class="hljs-title function_">monitorEvents</span>(<span class="hljs-variable language_">window</span>, [<span class="hljs-string">&quot;click&quot;</span>]);
 </code></pre>
 <p><img src="/adios-blogs/assets/posts/202209/2022-09-13-command-line-api-monitorEvents.gif" alt="monitorEvents"></p>
-<h4 id="unmonitorevents(object-events)" tabindex="-1"><a class="header-anchor" href="#unmonitorevents(object-events)">#</a>unmonitorEvents(object[, events])</h4>
+<h4 id="unmonitorevents(objectevents)" tabindex="-1"><a class="header-anchor" href="#unmonitorevents(objectevents)">¶</a>unmonitorEvents(object[, events])</h4>
 <p>我们还可以指定一种可用的事件&quot;类型&quot;，即映射到预定义事件集的字符串。下表列出了可用的事件类型及其关联的事件映射：</p>
 <table>
 <thead>
@@ -136,7 +136,7 @@ keyList2.<span class="hljs-title function_">filter</span>(<span class="hljs-func
 <pre class="language-js" data-lang="Javascript"><code><span class="hljs-title function_">monitorEvents</span>(<span class="hljs-variable language_">window</span>, <span class="hljs-string">&quot;key&quot;</span>);
 </code></pre>
 <p><img src="/adios-blogs/assets/posts/202209/2022-09-13-command-line-api-monitorEvents-02.png" alt="monitorEvents"></p>
-<h4 id="unmonitorevents(object-events)-1" tabindex="-1"><a class="header-anchor" href="#unmonitorevents(object-events)-1">#</a>unmonitorEvents(object[, events])</h4>
+<h4 id="unmonitorevents(objectevents)-1" tabindex="-1"><a class="header-anchor" href="#unmonitorevents(objectevents)-1">¶</a>unmonitorEvents(object[, events])</h4>
 <p>停止监视指定对象和事件的事件。</p>
 <p>例如，停止对 window 对象的所有事件监视：</p>
 <pre class="language-js" data-lang="Javascript"><code><span class="hljs-title function_">unmonitorEvents</span>(<span class="hljs-variable language_">window</span>);
@@ -148,7 +148,7 @@ keyList2.<span class="hljs-title function_">filter</span>(<span class="hljs-func
 <blockquote>
 <p>查看<a href="https://github.com/GoogleChrome/devtools-docs/blob/master/docs/console.md#monitoring-events">更多示例</a></p>
 </blockquote>
-<h4 id="profile(name)" tabindex="-1"><a class="header-anchor" href="#profile(name)">#</a>profile([name])</h4>
+<h4 id="profile(name)" tabindex="-1"><a class="header-anchor" href="#profile(name)">¶</a>profile([name])</h4>
 <p>使用可选名称启动 <code>JavaScript CPU</code> 分析会话。若完成分析可调用<code>profileEnd([name])</code>;</p>
 <p>开始分析:</p>
 <pre class="language-js" data-lang="Javascript"><code><span class="hljs-title function_">profile</span>(<span class="hljs-string">&#x27;test&#x27;</span>);
@@ -170,18 +170,99 @@ keyList2.<span class="hljs-title function_">filter</span>(<span class="hljs-func
 <blockquote>
 <p>在chrome浏览器上测试使用时似乎没有效果…需追踪和确认。</p>
 </blockquote>
-<h4 id="profileend(name)" tabindex="-1"><a class="header-anchor" href="#profileend(name)">#</a>profileEnd([name])</h4>
+<h4 id="profileend(name)" tabindex="-1"><a class="header-anchor" href="#profileend(name)">¶</a>profileEnd([name])</h4>
 <p>停止使用 <code>profile()</code> 方法启动的当前分析会话，并在 <code>Profiles</code> 面板中显示结果。</p>
-<h4 id="table(data-columns)" tabindex="-1"><a class="header-anchor" href="#table(data-columns)">#</a>table(data[, columns])</h4>
+<h4 id="table(datacolumns)" tabindex="-1"><a class="header-anchor" href="#table(datacolumns)">¶</a>table(data[, columns])</h4>
 <p>通过传入带有可选列标题的数据对象(对象数组或类对象数组)，使用表格记录对象数据。与<code>console.table()</code>方法等价。</p>
 <p><img src="/adios-blogs/assets/posts/202209/2022-09-13-command-line-api-table.png" alt="table"></p>
-<h4 id="api" tabindex="-1"><a class="header-anchor" href="#api">#</a>其他API</h4>
+<h4 id="其他api" tabindex="-1"><a class="header-anchor" href="#其他api">¶</a>其他API</h4>
 <p>Chrome 扩展可以在命令行 API 中注入额外的辅助方法。例如，<a href="https://chrome.google.com/webstore/detail/debug-utils/djailkkojeahmihdpcelmmobkpepmkcl">Debug Utils 扩展</a> (<a href="https://github.com/amasad/debug_utils">github</a>) 提供了用于中断属性访问、事件触发和方法调用的钩子。</p>
-<h4 id="2" tabindex="-1"><a class="header-anchor" href="#2">#</a>参考</h4>
+<h4 id="参考" tabindex="-1"><a class="header-anchor" href="#参考">¶</a>参考</h4>
 <ul>
 <li><a href="https://github.com/GoogleChrome/devtools-docs/blob/master/docs/commandline-api.md">commandline-api</a></li>
 </ul>
-</article></section></main><section class="app-post-footer"><div class="pure-g app-post-footer--box"><div class="pure-u-1 post-footer-updated"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>Updated at 01/10/2022 09:42</span></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#tag" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-tags"><li><a href="/adios-blogs/tags/api/1.html" title="api">api</a></li></ul></div></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#folder" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-categories"><li><a href="/adios-blogs/categories/devtool/1.html" title="Devtool">Devtool</a></li></ul></div></div></div></section><style>.scroll-btn {
+</article></section></main><section class="app-post-footer"><div class="pure-g app-post-footer--box"><div class="pure-u-1 post-footer-updated"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>Updated at 01/10/2022 09:42</span></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#tag" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-tags"><li><a href="/adios-blogs/tags/api/1.html" title="api">api</a></li></ul></div></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#folder" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-categories"><li><a href="/adios-blogs/categories/devtool/1.html" title="Devtool">Devtool</a></li></ul></div></div></div></section><style>body {
+    scroll-behavior: smooth;
+}
+ol.toc-list {
+    counter-reset: list-item;
+}
+li.toc-list-item {
+    display: block;
+    counter-increment: list-item;
+}
+li.toc-list-item::before {
+    content: counters(list-item,'.') ' ';
+}
+a.toc-list-item-link {
+    text-decoration: none;
+}
+
+#toc {
+    position: fixed;
+    right: -22rem;
+    top: 0;
+    width: 22rem;
+    height: 100vh;
+    transition: right .3s;
+    z-index: 1;
+    background-color: var(--toc-bg-color);
+}
+#toc.toc-show {
+    right: 0em;
+}
+#toc-container {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 2em;
+    max-height: 100%;
+    overflow-y: auto;
+}
+#toc-container > h3 { margin: 0; margin-bottom: 2em; }
+#toc-container > nav.table-of-contents ol {
+    margin: 0; padding: 0;
+}
+#toc-container > nav.table-of-contents li.toc-list-item ol {
+    padding-left: 2em;
+}
+nav.table-of-contents li.toc-list-item a.toc-list-item-link::after {
+    display: block;
+    content: '';
+    margin-bottom: 0.3em;
+}
+span#toc-btn {
+    position: absolute;
+    display: block;
+    left: -28px;
+    top: 50%;
+    bottom: 0;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    z-index: 1;
+    opacity: .5;
+}
+#toc.toc-show span#toc-btn {
+    left: 0px;
+    transition: left .3s;
+}
+
+@media screen and (max-width: 412px) {
+    #toc {
+        display: none;
+    }
+}
+</style><div class="toc-show" id="toc"><div id="toc-container"><h3>目录</h3><nav class="table-of-contents"><ol class="toc-list"><li class="toc-list-item"><a class="toc-list-item-link" href="#%E7%AE%80%E4%BB%8B">简介</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B">快速开始</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%24_">$_</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%240---%244">$0 - $4</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%24(selector)">$(selector)</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%24%24(selector)">$$(selector)</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%24x(xpath)">$x(xpath)</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#clear()">clear()</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#copy(object)">copy(object)</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#debug(function)-%26-undebug(function)">debug(function) &amp; undebug(function)</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#dir(obj)">dir(obj)</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#dirxml(object)">dirxml(object)</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#inspect(object%2Ffunction)">inspect(object/function)</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#geteventlisteners(object)">getEventListeners(object)</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#keys(object)-%26-values(object)">keys(object) &amp; values(object)</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#monitor(function)-%26-unmonitor(function)">monitor(function) &amp; unmonitor(function)</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#monitorevents(object%5B%2C-events%5D)">monitorEvents(object[, events])</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#unmonitorevents(object%5B%2C-events%5D)">unmonitorEvents(object[, events])</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#unmonitorevents(object%5B%2C-events%5D)-1">unmonitorEvents(object[, events])</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#profile(%5Bname%5D)">profile([name])</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#profileend(%5Bname%5D)">profileEnd([name])</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#table(data%5B%2C-columns%5D)">table(data[, columns])</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E5%85%B6%E4%BB%96api">其他API</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E5%8F%82%E8%80%83">参考</a></li></ol></nav></div><span id="toc-btn"><svg class="icon icon" aria-hidden="true" style="width:28px;height:28px;"><use xlink:href="#map" x="0" y="0" width="28" height="28"></use></svg></span></div><script>~(function() {
+    var btn = document.getElementById('toc-btn');
+    var toc = document.getElementById('toc');
+    if (btn && toc) {
+        btn.addEventListener('click', function () {
+            toc.classList.toggle('toc-show');
+        });
+    }
+})();</script><style>.scroll-btn {
     position: fixed;
     display: none;
     right: 3em;
@@ -243,4 +324,4 @@ function debouce(callback, ms) {
         window.onscroll = debouce(setStyle, 500);
     }
     btns = null;
-})();</script><footer class="pure-g app-footer"><div class="pure-u-1"><div class="pure-g"><div class="pure-u-1"><abbr class="share-license" title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.">CC BY-NC 4.0</abbr><span class="copyright">&copy; wiskewu. 2022</span></div><div class="pure-u-1 last-update">站点最后更新于: 11/26/2022</div></div></div></footer></div></div></body><script src="/adios-blogs/statics/js/main.js"></script></html>
+})();</script><footer class="pure-g app-footer"><div class="pure-u-1"><div class="pure-g"><div class="pure-u-1"><abbr class="share-license" title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.">CC BY-NC 4.0</abbr><span class="copyright">&copy; wiskewu. 2022</span></div><div class="pure-u-1 last-update">站点始于: 2022/07/17 最后更新于: 11/26/2022</div></div></div></footer></div></div></body><script src="/adios-blogs/statics/js/main.js"></script></html>

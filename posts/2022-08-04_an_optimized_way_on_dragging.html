@@ -1,6 +1,6 @@
-<html lang="zh"><head><title>Adiós Blog - 基于事件委托的拖拽优化</title><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="Adiós的个人博客网站"/><meta name="author"/><meta name="kewords" content="Adiós's independent blog"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss-min@2.1.0.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-base-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-grids-responsive-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/theme.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/layout.css"/><link rel="apple-touch-icon" sizes="180x180" href="/adios-blogs/statics/icons/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/adios-blogs/statics/icons/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/adios-blogs/statics/icons/favicon-16x16.png"/><link rel="manifest" href="/adios-blogs/statics/icons/site.webmanifest"/><link id="hl-github" rel="stylesheet" href="/adios-blogs/statics/css/highlight.js/github.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/markdown.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/post.css"/></head><body class="theme-light"><div id="app"><div id="app-container"><header class="app-post-header pure-g"><div class="pure-u-1"><div class="pure-g app-post-header--box"><h1 class="pure-u-1 post-header-title">基于事件委托的拖拽优化</h1><div class="pure-u-1 post-header-info"><p class="post-header-info--created"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>04/08/2022 23:15</span></p><span class="post-header-info--divider">·</span><p class="post-header-info--author"><svg class="icon icon" aria-hidden="true"><use xlink:href="#pencil-alt" x="0" y="0" width="16" height="16"></use></svg><span>wiskewu</span></p></div></div></div></header><div class="pure-g app-post-navigation"><span click="toggleTheme()"><a href="/adios-blogs/"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#home" x="0" y="0" width="24" height="24"></use></svg></a></span><span class="theme-btn" onclick="toggleTheme(this)"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#sun" x="0" y="0" width="24" height="24"></use></svg></span></div><hr/><main class="app-body"><section class="app-post-body"><article class="markdown app-post-body-content"><h4 id="1669440943438-001" tabindex="-1"><a class="header-anchor" href="#1669440943438-001">#</a>需求背景</h4>
+<html lang="zh"><head><title>Adiós Blog - 基于事件委托的拖拽优化</title><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="Adiós的个人博客网站"/><meta name="author"/><meta name="kewords" content="Adiós's independent blog"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss-min@2.1.0.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-base-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-grids-responsive-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/theme.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/layout.css"/><link rel="apple-touch-icon" sizes="180x180" href="/adios-blogs/statics/icons/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/adios-blogs/statics/icons/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/adios-blogs/statics/icons/favicon-16x16.png"/><link rel="manifest" href="/adios-blogs/statics/icons/site.webmanifest"/><link id="hl-github" rel="stylesheet" href="/adios-blogs/statics/css/highlight.js/github.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/markdown.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/katex/katex.min@0.5.1.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/post.css"/></head><body class="theme-light"><div id="app"><div id="app-container"><header class="app-post-header pure-g"><div class="pure-u-1"><div class="pure-g app-post-header--box"><h1 class="pure-u-1 post-header-title">基于事件委托的拖拽优化</h1><div class="pure-u-1 post-header-info"><p class="post-header-info--created"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>04/08/2022 23:15</span></p><span class="post-header-info--divider">·</span><p class="post-header-info--author"><svg class="icon icon" aria-hidden="true"><use xlink:href="#pencil-alt" x="0" y="0" width="16" height="16"></use></svg><span>wiskewu</span></p></div></div></div></header><div class="pure-g app-post-navigation"><span click="toggleTheme()"><a href="/adios-blogs/"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#home" x="0" y="0" width="24" height="24"></use></svg></a></span><span class="theme-btn" onclick="toggleTheme(this)"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#sun" x="0" y="0" width="24" height="24"></use></svg></span></div><hr/><main class="app-body"><section class="app-post-body"><article class="markdown app-post-body-content"><h4 id="需求背景" tabindex="-1"><a class="header-anchor" href="#需求背景">¶</a>需求背景</h4>
 <p>实现一个侧边栏，可通过拖拽调整侧边栏宽度。</p>
-<h4 id="1" tabindex="-1"><a class="header-anchor" href="#1">#</a>前期实现</h4>
+<h4 id="前期实现" tabindex="-1"><a class="header-anchor" href="#前期实现">¶</a>前期实现</h4>
 <p>对于这么一个需求，我们很快就随手写下如下代码：</p>
 <pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">import</span> <span class="hljs-title class_">React</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;react&#x27;</span>;
 <span class="hljs-keyword">import</span> styled <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;styled-component&#x27;</span>;
@@ -60,14 +60,14 @@
     )
 };
 </code></pre>
-<h4 id="2" tabindex="-1"><a class="header-anchor" href="#2">#</a>存在的问题</h4>
+<h4 id="存在的问题" tabindex="-1"><a class="header-anchor" href="#存在的问题">¶</a>存在的问题</h4>
 <p>上述代码虽然看似没问题，但实际操作起来却屡出问题，主要有几个问题：</p>
 <ol>
 <li>鼠标按下后移动过程中频繁触发组件渲染</li>
 <li>鼠标按下后快速移动时，鼠标可能不在<code>DragHandle</code>上，导致鼠标抬起时无法触发<code>DragHandle</code>的<code>onMouseUp</code>事件，从而导致缩放动作无法正常退出</li>
 <li>无法非常顺畅地进行缩放操作，鼠标位置经常脱离<code>DragHandle</code></li>
 </ol>
-<h4 id="3" tabindex="-1"><a class="header-anchor" href="#3">#</a>优化方案</h4>
+<h4 id="优化方案" tabindex="-1"><a class="header-anchor" href="#优化方案">¶</a>优化方案</h4>
 <p>我们主要考虑几个方面，一个是<code>事件委托</code>机制，一个是<code>原生DOM节点操作</code>。</p>
 <pre class="language-jsx" data-lang="Javascript"><code><span class="hljs-keyword">import</span> <span class="hljs-title class_">React</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;react&#x27;</span>;
 <span class="hljs-keyword">import</span> styled <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;styled-component&#x27;</span>;
@@ -143,9 +143,90 @@
 </code></pre>
 <p>我们利用节点<code>ref</code>直接操作节点样式，避免组件多次渲染引起的性能问题；<br>
 通过监听<code>DragHandle</code>的鼠标按下事件，将接下来的<code>mouseUp</code>和<code>mouseMove</code>分别委托至<code>document</code>对象，这样可避免鼠标移动过程中脱离<code>DragHandle</code>的问题，保证鼠标移动时的流畅度，避免事件丢失的问题。</p>
-<h4 id="4" tabindex="-1"><a class="header-anchor" href="#4">#</a>扩展</h4>
+<h4 id="扩展" tabindex="-1"><a class="header-anchor" href="#扩展">¶</a>扩展</h4>
 <p>网上已经有人实现了很多拖拽库，如<a href="https://www.npmjs.com/package/react-rnd"><code>react-rnd</code></a>等，具体的实现原理未探究，同样也是非常顺滑，有时间可以研究一下其实现原理。如果是业务场景需要的话，这个库基本上可以很好地解决此类问题。</p>
-</article></section></main><section class="app-post-footer"><div class="pure-g app-post-footer--box"><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#tag" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-tags"><li><a href="/adios-blogs/tags/react/1.html" title="React">React</a></li><li><a href="/adios-blogs/tags/event/1.html" title="Event">Event</a></li></ul></div></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#folder" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-categories"><li><a href="/adios-blogs/categories/前端/1.html" title="前端">前端</a></li></ul></div></div></div></section><style>.scroll-btn {
+</article></section></main><section class="app-post-footer"><div class="pure-g app-post-footer--box"><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#tag" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-tags"><li><a href="/adios-blogs/tags/react/1.html" title="React">React</a></li><li><a href="/adios-blogs/tags/event/1.html" title="Event">Event</a></li></ul></div></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#folder" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-categories"><li><a href="/adios-blogs/categories/前端/1.html" title="前端">前端</a></li></ul></div></div></div></section><style>body {
+    scroll-behavior: smooth;
+}
+ol.toc-list {
+    counter-reset: list-item;
+}
+li.toc-list-item {
+    display: block;
+    counter-increment: list-item;
+}
+li.toc-list-item::before {
+    content: counters(list-item,'.') ' ';
+}
+a.toc-list-item-link {
+    text-decoration: none;
+}
+
+#toc {
+    position: fixed;
+    right: -22rem;
+    top: 0;
+    width: 22rem;
+    height: 100vh;
+    transition: right .3s;
+    z-index: 1;
+    background-color: var(--toc-bg-color);
+}
+#toc.toc-show {
+    right: 0em;
+}
+#toc-container {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 2em;
+    max-height: 100%;
+    overflow-y: auto;
+}
+#toc-container > h3 { margin: 0; margin-bottom: 2em; }
+#toc-container > nav.table-of-contents ol {
+    margin: 0; padding: 0;
+}
+#toc-container > nav.table-of-contents li.toc-list-item ol {
+    padding-left: 2em;
+}
+nav.table-of-contents li.toc-list-item a.toc-list-item-link::after {
+    display: block;
+    content: '';
+    margin-bottom: 0.3em;
+}
+span#toc-btn {
+    position: absolute;
+    display: block;
+    left: -28px;
+    top: 50%;
+    bottom: 0;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    z-index: 1;
+    opacity: .5;
+}
+#toc.toc-show span#toc-btn {
+    left: 0px;
+    transition: left .3s;
+}
+
+@media screen and (max-width: 412px) {
+    #toc {
+        display: none;
+    }
+}
+</style><div class="toc-show" id="toc"><div id="toc-container"><h3>目录</h3><nav class="table-of-contents"><ol class="toc-list"><li class="toc-list-item"><a class="toc-list-item-link" href="#%E9%9C%80%E6%B1%82%E8%83%8C%E6%99%AF">需求背景</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E5%89%8D%E6%9C%9F%E5%AE%9E%E7%8E%B0">前期实现</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E5%AD%98%E5%9C%A8%E7%9A%84%E9%97%AE%E9%A2%98">存在的问题</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E4%BC%98%E5%8C%96%E6%96%B9%E6%A1%88">优化方案</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E6%89%A9%E5%B1%95">扩展</a></li></ol></nav></div><span id="toc-btn"><svg class="icon icon" aria-hidden="true" style="width:28px;height:28px;"><use xlink:href="#map" x="0" y="0" width="28" height="28"></use></svg></span></div><script>~(function() {
+    var btn = document.getElementById('toc-btn');
+    var toc = document.getElementById('toc');
+    if (btn && toc) {
+        btn.addEventListener('click', function () {
+            toc.classList.toggle('toc-show');
+        });
+    }
+})();</script><style>.scroll-btn {
     position: fixed;
     display: none;
     right: 3em;
@@ -207,4 +288,4 @@ function debouce(callback, ms) {
         window.onscroll = debouce(setStyle, 500);
     }
     btns = null;
-})();</script><footer class="pure-g app-footer"><div class="pure-u-1"><div class="pure-g"><div class="pure-u-1"><abbr class="share-license" title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.">CC BY-NC 4.0</abbr><span class="copyright">&copy; wiskewu. 2022</span></div><div class="pure-u-1 last-update">站点最后更新于: 11/26/2022</div></div></div></footer></div></div></body><script src="/adios-blogs/statics/js/main.js"></script></html>
+})();</script><footer class="pure-g app-footer"><div class="pure-u-1"><div class="pure-g"><div class="pure-u-1"><abbr class="share-license" title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.">CC BY-NC 4.0</abbr><span class="copyright">&copy; wiskewu. 2022</span></div><div class="pure-u-1 last-update">站点始于: 2022/07/17 最后更新于: 11/26/2022</div></div></div></footer></div></div></body><script src="/adios-blogs/statics/js/main.js"></script></html>

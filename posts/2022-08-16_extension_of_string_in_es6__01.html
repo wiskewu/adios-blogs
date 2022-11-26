@@ -1,7 +1,7 @@
-<html lang="zh"><head><title>Adiós Blog - 《ES6标准入门》- 字符串的扩展(上)</title><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="Adiós的个人博客网站"/><meta name="author"/><meta name="kewords" content="Adiós's independent blog"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss-min@2.1.0.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-base-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-grids-responsive-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/theme.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/layout.css"/><link rel="apple-touch-icon" sizes="180x180" href="/adios-blogs/statics/icons/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/adios-blogs/statics/icons/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/adios-blogs/statics/icons/favicon-16x16.png"/><link rel="manifest" href="/adios-blogs/statics/icons/site.webmanifest"/><link id="hl-github" rel="stylesheet" href="/adios-blogs/statics/css/highlight.js/github.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/markdown.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/post.css"/></head><body class="theme-light"><div id="app"><div id="app-container"><header class="app-post-header pure-g"><div class="pure-u-1"><div class="pure-g app-post-header--box"><h1 class="pure-u-1 post-header-title">《ES6标准入门》- 字符串的扩展(上)</h1><div class="pure-u-1 post-header-info"><p class="post-header-info--created"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>16/08/2022 23:45</span></p><span class="post-header-info--divider">·</span><p class="post-header-info--author"><svg class="icon icon" aria-hidden="true"><use xlink:href="#pencil-alt" x="0" y="0" width="16" height="16"></use></svg><span>wiskewu</span></p></div></div></div></header><div class="pure-g app-post-navigation"><span click="toggleTheme()"><a href="/adios-blogs/"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#home" x="0" y="0" width="24" height="24"></use></svg></a></span><span class="theme-btn" onclick="toggleTheme(this)"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#sun" x="0" y="0" width="24" height="24"></use></svg></span></div><hr/><main class="app-body"><section class="app-post-body"><article class="markdown app-post-body-content"><blockquote>
+<html lang="zh"><head><title>Adiós Blog - 《ES6标准入门》- 字符串的扩展(上)</title><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="Adiós的个人博客网站"/><meta name="author"/><meta name="kewords" content="Adiós's independent blog"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss-min@2.1.0.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-base-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/purecss/purecss@2.1.0-grids-responsive-min.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/theme.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/layout.css"/><link rel="apple-touch-icon" sizes="180x180" href="/adios-blogs/statics/icons/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/adios-blogs/statics/icons/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/adios-blogs/statics/icons/favicon-16x16.png"/><link rel="manifest" href="/adios-blogs/statics/icons/site.webmanifest"/><link id="hl-github" rel="stylesheet" href="/adios-blogs/statics/css/highlight.js/github.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/markdown.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/katex/katex.min@0.5.1.css"/><link rel="stylesheet" href="/adios-blogs/statics/css/post.css"/></head><body class="theme-light"><div id="app"><div id="app-container"><header class="app-post-header pure-g"><div class="pure-u-1"><div class="pure-g app-post-header--box"><h1 class="pure-u-1 post-header-title">《ES6标准入门》- 字符串的扩展(上)</h1><div class="pure-u-1 post-header-info"><p class="post-header-info--created"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>16/08/2022 23:45</span></p><span class="post-header-info--divider">·</span><p class="post-header-info--author"><svg class="icon icon" aria-hidden="true"><use xlink:href="#pencil-alt" x="0" y="0" width="16" height="16"></use></svg><span>wiskewu</span></p></div></div></div></header><div class="pure-g app-post-navigation"><span click="toggleTheme()"><a href="/adios-blogs/"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#home" x="0" y="0" width="24" height="24"></use></svg></a></span><span class="theme-btn" onclick="toggleTheme(this)"><svg class="icon icon" aria-hidden="true" style="width:24px;height:24px;"><use xlink:href="#sun" x="0" y="0" width="24" height="24"></use></svg></span></div><hr/><main class="app-body"><section class="app-post-body"><article class="markdown app-post-body-content"><blockquote>
 <p>参见阮一峰《ES6标准入门》Chapter4：字符串扩展 P49</p>
 </blockquote>
-<h4 id="unicode" tabindex="-1"><a class="header-anchor" href="#unicode">#</a>字符的Unicode表示法</h4>
+<h4 id="字符的unicode表示法" tabindex="-1"><a class="header-anchor" href="#字符的unicode表示法">¶</a>字符的Unicode表示法</h4>
 <p>JS采用<code>\uxxxx</code>形式表示一个字符，其中<code>xxxx</code>表示字符的<code>Unicode</code><strong>码点</strong>。如：</p>
 <pre class="language-js" data-lang="Javascript"><code><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;\u0061&#x27;</span>); <span class="hljs-comment">// a</span>
 </code></pre>
@@ -32,7 +32,7 @@ ES6对上述做出了改进，只需要将<strong>码点</strong>放入大括号
 <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;\u007A&#x27;</span> === <span class="hljs-string">&#x27;z&#x27;</span>); <span class="hljs-comment">// true</span>
 <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;\u{7A}&#x27;</span> === <span class="hljs-string">&#x27;z&#x27;</span>); <span class="hljs-comment">// true</span>
 </code></pre>
-<h4 id="codepointat()" tabindex="-1"><a class="header-anchor" href="#codepointat()">#</a>codePointAt()</h4>
+<h4 id="codepointat()" tabindex="-1"><a class="header-anchor" href="#codepointat()">¶</a>codePointAt()</h4>
 <p>在JS内部，字符以UTF-16的格式存储，<strong>每个字符固定为2个字节</strong>。对于那些需要4个字节存储的字符（Unicode码点大于<code>0xFFFF</code>的字符），JS会认为它们是2个字符。</p>
 <pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">var</span> s = <span class="hljs-string">&quot;𠮷&quot;</span>;
 
@@ -58,7 +58,7 @@ s.<span class="hljs-title function_">codePointAt</span>(<span class="hljs-number
 s.<span class="hljs-title function_">codePointAt</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-number">16</span>); <span class="hljs-comment">// &quot;20BB7&quot;</span>
 s.<span class="hljs-title function_">codePointAt</span>(<span class="hljs-number">2</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-number">16</span>); <span class="hljs-comment">// &quot;61&quot;</span>
 </code></pre>
-<h5 id="codepointat" tabindex="-1"><a class="header-anchor" href="#codepointat">#</a>正确使用codePointAt</h5>
+<h5 id="正确使用codepointat" tabindex="-1"><a class="header-anchor" href="#正确使用codepointat">¶</a>正确使用codePointAt</h5>
 <p>上述字符串’𠮷a’中，'a’的正确位置序号是1, 但是必须向<code>codePointAt</code>方法传入2; 解决这个问题的一个办法是使用<code>for...of</code>循环，它会正确识别32位的UTF-16字符。</p>
 <pre class="language-js" data-lang="Javascript"><code><span class="hljs-keyword">var</span> s = <span class="hljs-string">&#x27;𠮷a&#x27;</span>;
 
@@ -77,16 +77,16 @@ s.<span class="hljs-title function_">codePointAt</span>(<span class="hljs-number
 <span class="hljs-title function_">is32Bit</span>(<span class="hljs-string">&#x27;𠮷&#x27;</span>); <span class="hljs-comment">// true</span>
 <span class="hljs-title function_">is32Bit</span>(<span class="hljs-string">&#x27;a&#x27;</span>); <span class="hljs-comment">// false</span>
 </code></pre>
-<h4 id="string.fromcodepoint()" tabindex="-1"><a class="header-anchor" href="#string.fromcodepoint()">#</a>String.fromCodePoint()</h4>
+<h4 id="string.fromcodepoint()" tabindex="-1"><a class="header-anchor" href="#string.fromcodepoint()">¶</a>String.fromCodePoint()</h4>
 <p>与<code>codePointAt</code>对应，ES6提供了<code>String.FromCodePoint</code>方法用于识别32位的UTF-16字符，弥补了<code>String.FromCharCode</code>方法的不足。</p>
 <pre class="language-js" data-lang="Javascript"><code><span class="hljs-title class_">String</span>.<span class="hljs-title function_">fromCodePoint</span>(<span class="hljs-number">0x20BB7</span>); <span class="hljs-comment">// &#x27;𠮷&#x27;</span>
 
 <span class="hljs-title class_">String</span>.<span class="hljs-title function_">fromCodePoint</span>(<span class="hljs-number">0x78</span>, <span class="hljs-number">0x1f680</span>, <span class="hljs-number">0x79</span>) === <span class="hljs-string">&#x27;x\uD83D\uDE80y&#x27;</span>; <span class="hljs-comment">// true</span>
 </code></pre>
 <p>可知，<code>String.fromCodePoint</code>方法支持多个参数，它们会被合并为一个字符串返回。</p>
-<h4 id="1669440943448-001" tabindex="-1"><a class="header-anchor" href="#1669440943448-001">#</a>字符串的遍历器接口</h4>
+<h4 id="字符串的遍历器接口" tabindex="-1"><a class="header-anchor" href="#字符串的遍历器接口">¶</a>字符串的遍历器接口</h4>
 <p>前面提到，<code>for...of</code>可以正确识别32位的UTF-16字符，而普通的<code>for (;;)</code>循环则无法正确识别大于<code>0xFFFFF</code>码点地字符。</p>
-<h4 id="at()" tabindex="-1"><a class="header-anchor" href="#at()">#</a>at()</h4>
+<h4 id="at()" tabindex="-1"><a class="header-anchor" href="#at()">¶</a>at()</h4>
 <p>ES5对字符串提供了<code>charAt</code>方法，返回字符串给定位置的字符，但该方法无法正确识别码点大于<code>0xFFFF</code>的字符。</p>
 <pre class="language-js" data-lang="Javascript"><code><span class="hljs-string">&#x27;abc&#x27;</span>.<span class="hljs-title function_">charAt</span>(<span class="hljs-number">0</span>); <span class="hljs-comment">// &#x27;a&#x27;</span>
 <span class="hljs-string">&#x27;𠮷&#x27;</span>.<span class="hljs-title function_">charAt</span>(<span class="hljs-number">0</span>); <span class="hljs-comment">// &#x27;\uD842&#x27;</span>
@@ -97,7 +97,7 @@ s.<span class="hljs-title function_">codePointAt</span>(<span class="hljs-number
 <span class="hljs-string">&#x27;𠮷&#x27;</span>.<span class="hljs-title function_">at</span>(<span class="hljs-number">0</span>); <span class="hljs-comment">// &#x27;𠮷&#x27;</span>
 </code></pre>
 <p>这个方法可以通过<a href="github.com/es-shims/String.prototype.at">垫片库</a>实现。</p>
-<h4 id="normalize()" tabindex="-1"><a class="header-anchor" href="#normalize()">#</a>normalize()</h4>
+<h4 id="normalize()" tabindex="-1"><a class="header-anchor" href="#normalize()">¶</a>normalize()</h4>
 <p>许多欧洲语言有语调符号和重音符号，为了表示它们，Unicode提供了两种方法，一种是直接提供带重音符号的字符，比如’Ǒ’(\u01D1); 另一种是提供<strong>合成符号</strong>（combining character），即原字符与重音符号合成为一个字符，比如’O’（\u004F）与’̌’（\u030C）合成’Ǒ’(\u004F\u030C)。</p>
 <p>这两种表示方法在视觉和语义上都是等价的，但是JS却无法识别。</p>
 <pre class="language-js" data-lang="Javascript"><code><span class="hljs-string">&#x27;\u01D1&#x27;</span> === <span class="hljs-string">&#x27;\u004F\u030C&#x27;</span>; <span class="hljs-comment">// false</span>
@@ -115,7 +115,7 @@ s.<span class="hljs-title function_">codePointAt</span>(<span class="hljs-number
 <li>NFKD: 表示&quot;兼容等价分解&quot;(Normalization Form Compatibility Decomposition);</li>
 </ul>
 <p><code>normalize</code>方法目前不能识别3个或3个以上字符的合成，这种情况下，还是只能使用正则表达式，通过Unicode编号区间判断。</p>
-<h4 id="include()startswith()endswith()" tabindex="-1"><a class="header-anchor" href="#include()startswith()endswith()">#</a>include()、startsWith()、endsWith()</h4>
+<h4 id="include()startswith()endswith()" tabindex="-1"><a class="header-anchor" href="#include()startswith()endswith()">¶</a>include()、startsWith()、endsWith()</h4>
 <p>ES6增加3种方法用来确定一个字符串是否包含在另一个字符串中：</p>
 <ul>
 <li>include(): 返回布尔值，表示是否找到参数字符串；</li>
@@ -134,7 +134,7 @@ s.<span class="hljs-title function_">endsWith</span>(<span class="hljs-string">&
 s.<span class="hljs-title function_">include</span>(<span class="hljs-string">&#x27;Hello&#x27;</span>, <span class="hljs-number">6</span>); <span class="hljs-comment">// false</span>
 </code></pre>
 <p>当接受第二个参数<code>n</code>时，<code>endsWith</code>的行为与其他两个方法有所不同，它针对前n个字符，而其他两个方法针对从第n个位置到字符串结束位置之间的字符。</p>
-<h4 id="repeat()" tabindex="-1"><a class="header-anchor" href="#repeat()">#</a>repeat()</h4>
+<h4 id="repeat()" tabindex="-1"><a class="header-anchor" href="#repeat()">¶</a>repeat()</h4>
 <p><code>repeat</code>方法返回一个新字符串，表示将原字符串重复n次。</p>
 <pre class="language-js" data-lang="Javascript"><code><span class="hljs-string">&#x27;x&#x27;</span>.<span class="hljs-title function_">repeat</span>(<span class="hljs-number">3</span>); <span class="hljs-comment">// &#x27;xxx&#x27;</span>
 <span class="hljs-string">&#x27;hello&#x27;</span>.<span class="hljs-title function_">repeat</span>(<span class="hljs-number">2</span>); <span class="hljs-comment">// &#x27;hellohello&#x27;</span>
@@ -158,7 +158,7 @@ s.<span class="hljs-title function_">include</span>(<span class="hljs-string">&#
 <span class="hljs-string">&#x27;na&#x27;</span>.<span class="hljs-title function_">repeat</span>(<span class="hljs-string">&#x27;aaa&#x27;</span>); <span class="hljs-comment">// &#x27;&#x27;</span>
 <span class="hljs-string">&#x27;na&#x27;</span>.<span class="hljs-title function_">repeat</span>(<span class="hljs-string">&#x27;3&#x27;</span>); <span class="hljs-comment">// &#x27;nanana&#x27;</span>
 </code></pre>
-<h4 id="padstart()padend()" tabindex="-1"><a class="header-anchor" href="#padstart()padend()">#</a>padStart()、padEnd()</h4>
+<h4 id="padstart()padend()" tabindex="-1"><a class="header-anchor" href="#padstart()padend()">¶</a>padStart()、padEnd()</h4>
 <p>ES2017引入了字符串补全长度的功能。</p>
 <pre class="language-js" data-lang="Javascript"><code><span class="hljs-string">&#x27;x&#x27;</span>.<span class="hljs-title function_">padStart</span>(<span class="hljs-number">5</span>, <span class="hljs-string">&#x27;ab&#x27;</span>); <span class="hljs-comment">// &#x27;ababx&#x27;</span>
 <span class="hljs-string">&#x27;x&#x27;</span>.<span class="hljs-title function_">padStart</span>(<span class="hljs-number">4</span>, <span class="hljs-string">&#x27;ab&#x27;</span>); <span class="hljs-comment">// &#x27;abax&#x27;</span>
@@ -186,7 +186,88 @@ s.<span class="hljs-title function_">include</span>(<span class="hljs-string">&#
 
 <span class="hljs-string">&#x27;09-12&#x27;</span>.<span class="hljs-title function_">padStart</span>(<span class="hljs-number">10</span>, <span class="hljs-string">&#x27;YYYY-MM-DD&#x27;</span>); <span class="hljs-comment">// &#x27;YYYY-09-12&#x27;</span>
 </code></pre>
-</article></section></main><section class="app-post-footer"><div class="pure-g app-post-footer--box"><div class="pure-u-1 post-footer-updated"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>Updated at 20/08/2022 13:30</span></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#tag" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-tags"><li><a href="/adios-blogs/tags/es6/1.html" title="ES6">ES6</a></li></ul></div></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#folder" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-categories"><li><a href="/adios-blogs/categories/前端/1.html" title="前端">前端</a></li></ul></div></div></div></section><style>.scroll-btn {
+</article></section></main><section class="app-post-footer"><div class="pure-g app-post-footer--box"><div class="pure-u-1 post-footer-updated"><svg class="icon icon" aria-hidden="true"><use xlink:href="#calendar" x="0" y="0" width="16" height="16"></use></svg><span>Updated at 20/08/2022 13:30</span></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#tag" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-tags"><li><a href="/adios-blogs/tags/es6/1.html" title="ES6">ES6</a></li></ul></div></div><div class="pure-u-1"><div class="pure-g"><svg class="icon icon" aria-hidden="true"><use xlink:href="#folder" x="0" y="0" width="16" height="16"></use></svg><ul class="pure-g post-footer-categories"><li><a href="/adios-blogs/categories/前端/1.html" title="前端">前端</a></li></ul></div></div></div></section><style>body {
+    scroll-behavior: smooth;
+}
+ol.toc-list {
+    counter-reset: list-item;
+}
+li.toc-list-item {
+    display: block;
+    counter-increment: list-item;
+}
+li.toc-list-item::before {
+    content: counters(list-item,'.') ' ';
+}
+a.toc-list-item-link {
+    text-decoration: none;
+}
+
+#toc {
+    position: fixed;
+    right: -22rem;
+    top: 0;
+    width: 22rem;
+    height: 100vh;
+    transition: right .3s;
+    z-index: 1;
+    background-color: var(--toc-bg-color);
+}
+#toc.toc-show {
+    right: 0em;
+}
+#toc-container {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 2em;
+    max-height: 100%;
+    overflow-y: auto;
+}
+#toc-container > h3 { margin: 0; margin-bottom: 2em; }
+#toc-container > nav.table-of-contents ol {
+    margin: 0; padding: 0;
+}
+#toc-container > nav.table-of-contents li.toc-list-item ol {
+    padding-left: 2em;
+}
+nav.table-of-contents li.toc-list-item a.toc-list-item-link::after {
+    display: block;
+    content: '';
+    margin-bottom: 0.3em;
+}
+span#toc-btn {
+    position: absolute;
+    display: block;
+    left: -28px;
+    top: 50%;
+    bottom: 0;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    z-index: 1;
+    opacity: .5;
+}
+#toc.toc-show span#toc-btn {
+    left: 0px;
+    transition: left .3s;
+}
+
+@media screen and (max-width: 412px) {
+    #toc {
+        display: none;
+    }
+}
+</style><div class="toc-show" id="toc"><div id="toc-container"><h3>目录</h3><nav class="table-of-contents"><ol class="toc-list"><li class="toc-list-item"><a class="toc-list-item-link" href="#%E5%AD%97%E7%AC%A6%E7%9A%84unicode%E8%A1%A8%E7%A4%BA%E6%B3%95">字符的Unicode表示法</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#codepointat()">codePointAt()</a><ol class="toc-list"><li class="toc-list-item"><a class="toc-list-item-link" href="#%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8codepointat">正确使用codePointAt</a></li></ol></li><li class="toc-list-item"><a class="toc-list-item-link" href="#string.fromcodepoint()">String.fromCodePoint()</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E9%81%8D%E5%8E%86%E5%99%A8%E6%8E%A5%E5%8F%A3">字符串的遍历器接口</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#at()">at()</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#normalize()">normalize()</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#include()%E3%80%81startswith()%E3%80%81endswith()">include()、startsWith()、endsWith()</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#repeat()">repeat()</a></li><li class="toc-list-item"><a class="toc-list-item-link" href="#padstart()%E3%80%81padend()">padStart()、padEnd()</a></li></ol></nav></div><span id="toc-btn"><svg class="icon icon" aria-hidden="true" style="width:28px;height:28px;"><use xlink:href="#map" x="0" y="0" width="28" height="28"></use></svg></span></div><script>~(function() {
+    var btn = document.getElementById('toc-btn');
+    var toc = document.getElementById('toc');
+    if (btn && toc) {
+        btn.addEventListener('click', function () {
+            toc.classList.toggle('toc-show');
+        });
+    }
+})();</script><style>.scroll-btn {
     position: fixed;
     display: none;
     right: 3em;
@@ -248,4 +329,4 @@ function debouce(callback, ms) {
         window.onscroll = debouce(setStyle, 500);
     }
     btns = null;
-})();</script><footer class="pure-g app-footer"><div class="pure-u-1"><div class="pure-g"><div class="pure-u-1"><abbr class="share-license" title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.">CC BY-NC 4.0</abbr><span class="copyright">&copy; wiskewu. 2022</span></div><div class="pure-u-1 last-update">站点最后更新于: 11/26/2022</div></div></div></footer></div></div></body><script src="/adios-blogs/statics/js/main.js"></script></html>
+})();</script><footer class="pure-g app-footer"><div class="pure-u-1"><div class="pure-g"><div class="pure-u-1"><abbr class="share-license" title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.">CC BY-NC 4.0</abbr><span class="copyright">&copy; wiskewu. 2022</span></div><div class="pure-u-1 last-update">站点始于: 2022/07/17 最后更新于: 11/26/2022</div></div></div></footer></div></div></body><script src="/adios-blogs/statics/js/main.js"></script></html>
